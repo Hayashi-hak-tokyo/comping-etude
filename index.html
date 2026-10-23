@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Jazz Drummer's Etude</title>
+  <title>Jazz Drummer's Etude (Snare & Kick)</title>
   <script src="https://cdn.tailwindcss.com"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/tone/14.8.49/Tone.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/vexflow/3.0.9/vexflow-min.js"></script>
@@ -26,7 +26,7 @@
     <!-- ヘッダー -->
     <div class="text-center border-b-2 border-gray-200 pb-6 mb-8">
       <h1 class="text-4xl font-bold tracking-tight text-gray-900" style="font-family: 'Times New Roman', Times, serif;">Beyond Bop Etude</h1>
-      <p class="text-gray-500 mt-2 font-medium">8-Bar Practice: Snare & Kick Comping (Bars 1-7) + Fill-in (Bar 8)</p>
+      <p class="text-gray-500 mt-2 font-medium">John Riley Concept: Snare & Kick Comping (Bars 1-7) + Bebop Fill (Bar 8)</p>
     </div>
 
     <!-- コントロールパネル -->
@@ -59,7 +59,7 @@
     <!-- 楽譜表示エリア -->
     <div class="book-page p-6 rounded-xl flex flex-col items-center overflow-x-auto">
       <div id="score-container" class="w-full flex justify-center min-w-[800px]"></div>
-      <p class="text-sm text-gray-500 mt-6 text-center">※ライドとハイハットは4/4ジャズパターンをキープし、記譜されたスネアとキックを演奏してください。</p>
+      <p class="text-sm text-gray-500 mt-6 text-center">※ライドとハイハットは4/4ジャズパターンをキープし、記譜されたスネアとキックのフレーズを演奏してください。</p>
     </div>
 
   </div>
@@ -85,12 +85,11 @@
     let isPlaying = false;
     let currentBpm = 120;
     
-    // メトロノーム音源 (Tone.js)
+    // メトロノーム音源 (Tone.js) - Jazz Drummer's Etude と同一の仕様
     let clickHigh, clickLow;
 
     function initAudio() {
       if(clickHigh) return;
-      // 鋭いクリック音を作成
       clickHigh = new Tone.Synth({
         oscillator: { type: "square" },
         envelope: { attack: 0.001, decay: 0.1, sustain: 0, release: 0.01 },
@@ -123,7 +122,6 @@
       } else {
         await Tone.start();
         initAudio();
-        
         Tone.Transport.bpm.value = currentBpm;
 
         let barCount = 1;
@@ -206,14 +204,18 @@
       const stave3 = new VF.Stave(stave2.width + stave2.x, 20, 190);
       const stave4 = new VF.Stave(stave3.width + stave3.x, 20, 190);
 
-      // Bar 1: Snare on 2-and
-      const notes1 = [ n(["b/4"], "qr"), n(["c/5"], "8"), n(["b/4"], "8r"), n(["b/4"], "hr") ];
-      // Bar 2: Kick on 4-and
-      const notes2 = [ n(["b/4"], "hr"), n(["b/4"], "qr"), n(["b/4"], "8r"), n(["f/4"], "8") ];
-      // Bar 3: Snare on 2, Kick on 3-and
-      const notes3 = [ n(["b/4"], "qr"), n(["c/5"], "q"), n(["b/4"], "8r"), n(["f/4"], "8"), n(["b/4"], "qr") ];
-      // Bar 4: Snare on 1-and, Kick on 4
-      const notes4 = [ n(["b/4"], "8r"), n(["c/5"], "8"), n(["b/4"], "qr"), n(["b/4"], "qr"), n(["f/4"], "q") ];
+      // John Riley コンセプトフレーズ
+      // Bar 1: Snare on 2-and, Kick on 4 (シンコペーションの基本)
+      const notes1 = [ n(["b/4"], "qr"), n(["b/4"], "8r"), n(["c/5"], "8"), n(["b/4"], "qr"), n(["f/4"], "q") ];
+      
+      // Bar 2: Kick on 1-and, Snare on 3
+      const notes2 = [ n(["b/4"], "8r"), n(["f/4"], "8"), n(["b/4"], "qr"), n(["c/5"], "q"), n(["b/4"], "qr") ];
+      
+      // Bar 3: Snare on 1-and, Kick on 2-and, Snare on 4-and (密度を上げる)
+      const notes3 = [ n(["b/4"], "8r"), n(["c/5"], "8"), n(["b/4"], "8r"), n(["f/4"], "8"), n(["b/4"], "qr"), n(["b/4"], "8r"), n(["c/5"], "8") ];
+      
+      // Bar 4: Kick on 3-and, Snare on 4
+      const notes4 = [ n(["b/4"], "hr"), n(["b/4"], "8r"), n(["f/4"], "8"), n(["c/5"], "q") ];
 
       [stave1, stave2, stave3, stave4].forEach(s => s.setContext(context).draw());
       
@@ -234,13 +236,16 @@
       const stave7 = new VF.Stave(stave6.width + stave6.x, 150, 190);
       const stave8 = new VF.Stave(stave7.width + stave7.x, 150, 200);
       
-      // Bar 5: Snare on 3
-      const notes5 = [ n(["b/4"], "hr"), n(["c/5"], "q"), n(["b/4"], "qr") ];
-      // Bar 6: Kick on 2-and, Snare on 4-and
-      const notes6 = [ n(["b/4"], "qr"), n(["b/4"], "8r"), n(["f/4"], "8"), n(["b/4"], "qr"), n(["b/4"], "8r"), n(["c/5"], "8") ];
-      // Bar 7: Kick on 1-and, Snare on 3-and
-      const notes7 = [ n(["b/4"], "8r"), n(["f/4"], "8"), n(["b/4"], "qr"), n(["b/4"], "8r"), n(["c/5"], "8"), n(["b/4"], "qr") ];
-      // Bar 8 (Fill): Dropping Bombs (16th Snare on 1 & 3, Kick on 2 & 4)
+      // Bar 5: Kick on 2, Snare on 3, Kick on 4-and
+      const notes5 = [ n(["b/4"], "qr"), n(["f/4"], "q"), n(["c/5"], "q"), n(["b/4"], "8r"), n(["f/4"], "8") ];
+      
+      // Bar 6: Snare on 1, Snare on 2-and, Kick on 4
+      const notes6 = [ n(["c/5"], "q"), n(["b/4"], "8r"), n(["c/5"], "8"), n(["b/4"], "qr"), n(["f/4"], "q") ];
+      
+      // Bar 7: 3-Beat Phrasing 的なアプローチ (Snare 1&, Kick 3, Snare 4&)
+      const notes7 = [ n(["b/4"], "8r"), n(["c/5"], "8"), n(["b/4"], "qr"), n(["f/4"], "q"), n(["b/4"], "8r"), n(["c/5"], "8") ];
+      
+      // Bar 8 (Fill): Classic Bebop "Dropping Bombs" (16th Snare on 1 & 3, Kick on 2 & 4)
       const notes8 = [ 
         n(["c/5"], "16"), n(["c/5"], "16"), n(["c/5"], "16"), n(["c/5"], "16"), // Beat 1
         n(["f/4"], "q"), // Beat 2
