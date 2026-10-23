@@ -3,129 +3,81 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Beyond Bop Practice</title>
-  <!-- Tailwind CSS (スタイリング用) -->
+  <title>Jazz Drummer's Etude</title>
   <script src="https://cdn.tailwindcss.com"></script>
-  <!-- Tone.js (オーディオエンジン) -->
   <script src="https://cdnjs.cloudflare.com/ajax/libs/tone/14.8.49/Tone.js"></script>
+  <!-- 楽譜描画用のVexFlow -->
+  <script src="https://unpkg.com/vexflow/releases/vexflow-debug.js"></script>
   <style>
-    /* カスタムアニメーションとUIの微調整 */
-    body {
-      background-color: #0a0a0a;
-      -webkit-tap-highlight-color: transparent;
-    }
-    .active-beat {
-      box-shadow: 0 0 12px currentColor;
-    }
+    body { background-color: #0f1115; color: #e2e8f0; font-family: 'Inter', sans-serif; }
+    .active-bar { background-color: #3b82f6; color: white; border-color: #3b82f6; box-shadow: 0 0 15px rgba(59, 130, 246, 0.5); }
+    .fill-bar { background-color: #f59e0b; color: #1e293b; border-color: #f59e0b; box-shadow: 0 0 15px rgba(245, 158, 11, 0.5); }
+    #score-container svg { max-width: 100%; height: auto; } /* スマホ対応 */
   </style>
 </head>
-<body class="min-h-screen text-gray-100 font-sans flex items-center justify-center p-4">
+<body class="min-h-screen flex flex-col items-center py-10 px-4">
 
-  <div class="max-w-xl w-full space-y-8">
+  <div class="max-w-2xl w-full space-y-8">
     
     <!-- ヘッダー -->
     <div class="text-center space-y-2">
-      <div class="inline-flex items-center justify-center p-3 bg-blue-500/10 rounded-full mb-4">
-        <!-- SVG Icon (Activity) -->
-        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-blue-400">
-          <polyline points="22 12 18 12 15 21 9 3 6 12 2 12"></polyline>
-        </svg>
-      </div>
-      <h1 class="text-3xl font-bold tracking-tight">Beyond Bop Practice</h1>
-      <p class="text-gray-400 text-sm">7-Bar Comping & 1-Bar Bebop Fill</p>
+      <h1 class="text-3xl font-bold tracking-tight text-white">Jazz Drummer's Etude</h1>
+      <p class="text-gray-400">Beyond Bop Concept: 7-Bar Comping & 1-Bar Fill</p>
     </div>
 
-    <!-- メインディスプレイ -->
-    <div class="bg-[#111111] border border-gray-800 rounded-2xl p-8 shadow-2xl relative overflow-hidden">
+    <!-- 小節トラッカー -->
+    <div class="bg-gray-800/50 border border-gray-700 p-6 rounded-2xl shadow-xl">
+      <div class="flex justify-between items-center mb-4">
+        <span class="text-sm font-semibold text-gray-400 uppercase tracking-wider">Bar Tracker</span>
+        <span id="status-text" class="text-sm font-bold text-blue-400">Comping</span>
+      </div>
+      <div class="grid grid-cols-8 gap-2" id="bar-tracker">
+        <!-- JSで生成 -->
+      </div>
+    </div>
+
+    <!-- 楽譜表示エリア (VexFlow) -->
+    <div class="bg-white p-6 rounded-2xl shadow-xl flex flex-col items-center relative overflow-hidden">
+      <div class="absolute top-0 left-0 w-full h-1 bg-amber-500"></div>
+      <h2 class="text-gray-800 font-bold mb-2 text-center w-full">Bar 8: Fill-in (Dropping Bombs)</h2>
+      <p class="text-xs text-gray-500 mb-4">※スネアとバスドラムのコンビネーションフレーズ</p>
       
-      <!-- ステータスバッジ -->
-      <div class="absolute top-6 left-6">
-        <span id="status-badge" class="px-3 py-1 text-xs font-bold uppercase tracking-wider rounded-full bg-blue-500/20 text-blue-400 border border-blue-500/30 transition-colors duration-300">
-          Comping
-        </span>
-      </div>
-
-      <!-- 小節カウンター -->
-      <div class="flex flex-col items-center justify-center mt-12 mb-8">
-        <div class="flex items-baseline gap-2">
-          <span id="current-bar" class="text-8xl font-black tabular-nums transition-colors duration-200 text-gray-100">
-            1
-          </span>
-          <span class="text-3xl font-bold text-gray-600">/ 8</span>
-        </div>
-        
-        <!-- 拍(Beat)インジケーター -->
-        <div class="flex gap-3 mt-6" id="beat-indicators">
-          <div id="beat-0" class="w-3 h-3 rounded-full bg-gray-800 transition-all duration-100"></div>
-          <div id="beat-1" class="w-3 h-3 rounded-full bg-gray-800 transition-all duration-100"></div>
-          <div id="beat-2" class="w-3 h-3 rounded-full bg-gray-800 transition-all duration-100"></div>
-          <div id="beat-3" class="w-3 h-3 rounded-full bg-gray-800 transition-all duration-100"></div>
-        </div>
-      </div>
-
-      <!-- 8小節グリッドビジュアライザー -->
-      <div class="grid grid-cols-8 gap-2 mt-8" id="bar-visualizers">
-        <div id="bar-1" class="h-2 rounded-full bg-gray-800 transition-all duration-300"></div>
-        <div id="bar-2" class="h-2 rounded-full bg-gray-800 transition-all duration-300"></div>
-        <div id="bar-3" class="h-2 rounded-full bg-gray-800 transition-all duration-300"></div>
-        <div id="bar-4" class="h-2 rounded-full bg-gray-800 transition-all duration-300"></div>
-        <div id="bar-5" class="h-2 rounded-full bg-gray-800 transition-all duration-300"></div>
-        <div id="bar-6" class="h-2 rounded-full bg-gray-800 transition-all duration-300"></div>
-        <div id="bar-7" class="h-2 rounded-full bg-gray-800 transition-all duration-300"></div>
-        <div id="bar-8" class="h-2 rounded-full bg-gray-800 transition-all duration-300"></div>
-      </div>
+      <!-- ここに楽譜がレンダリングされます -->
+      <div id="score-container" class="w-full flex justify-center"></div>
     </div>
 
     <!-- コントロール -->
-    <div class="bg-[#111111] border border-gray-800 rounded-2xl p-6 space-y-6">
-      <div class="space-y-4">
-        <div class="flex justify-between items-end">
-          <label class="text-sm font-semibold text-gray-400">Tempo</label>
-          <div class="text-2xl font-bold tabular-nums">
-            <span id="bpm-display">160</span> <span class="text-sm text-gray-500 font-normal">BPM</span>
-          </div>
-        </div>
-        <input
-          type="range"
-          id="bpm-slider"
-          min="80"
-          max="280"
-          step="1"
-          value="160"
-          class="w-full h-2 bg-gray-800 rounded-full appearance-none cursor-pointer accent-blue-500"
-        />
+    <div class="bg-gray-800/50 border border-gray-700 p-6 rounded-2xl shadow-xl space-y-6">
+      <div class="flex items-center justify-between">
+        <label class="text-sm font-semibold text-gray-400">BPM (Tempo)</label>
+        <div class="text-2xl font-bold text-white"><span id="bpm-display">160</span></div>
       </div>
-
-      <button
-        id="play-btn"
-        class="w-full py-4 rounded-xl font-bold text-lg flex items-center justify-center gap-2 transition-all duration-200 bg-blue-500 text-white hover:bg-blue-600 hover:shadow-lg hover:shadow-blue-500/25 active:scale-[0.98]"
-      >
-        <svg id="play-icon" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="currentColor" class="w-6 h-6"><polygon points="5 3 19 12 5 21 5 3"></polygon></svg>
-        <svg id="stop-icon" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="currentColor" class="w-5 h-5 hidden"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect></svg>
-        <span id="play-text">Start Practice</span>
+      <input type="range" id="bpm-slider" min="80" max="260" step="1" value="160" class="w-full h-2 bg-gray-700 rounded-full appearance-none cursor-pointer accent-blue-500" />
+      
+      <button id="play-btn" class="w-full py-4 rounded-xl font-bold text-lg transition-all duration-200 bg-blue-600 text-white hover:bg-blue-500 active:scale-[0.98] shadow-lg shadow-blue-900/50">
+        START PRACTICE
       </button>
     </div>
 
   </div>
 
   <script>
-    // --- UI Elements ---
+    // --- UI要素の取得 ---
     const playBtn = document.getElementById('play-btn');
-    const playIcon = document.getElementById('play-icon');
-    const stopIcon = document.getElementById('stop-icon');
-    const playText = document.getElementById('play-text');
     const bpmSlider = document.getElementById('bpm-slider');
     const bpmDisplay = document.getElementById('bpm-display');
-    const currentBarEl = document.getElementById('current-bar');
-    const statusBadge = document.getElementById('status-badge');
-    const beats = [
-      document.getElementById('beat-0'),
-      document.getElementById('beat-1'),
-      document.getElementById('beat-2'),
-      document.getElementById('beat-3')
-    ];
+    const barTracker = document.getElementById('bar-tracker');
+    const statusText = document.getElementById('status-text');
+
+    // 小節トラッカーの生成
     const bars = [];
-    for(let i=1; i<=8; i++) bars.push(document.getElementById(`bar-${i}`));
+    for(let i = 1; i <= 8; i++) {
+      const div = document.createElement('div');
+      div.className = 'h-12 flex items-center justify-center rounded-lg border border-gray-700 text-gray-500 font-bold transition-all duration-200';
+      div.textContent = i;
+      barTracker.appendChild(div);
+      bars.push(div);
+    }
 
     // --- State ---
     let isPlaying = false;
@@ -133,10 +85,46 @@
     let transportId = null;
     let synths = {};
 
-    // --- Tone.js Setup ---
-    function initSynths() {
-      if(Object.keys(synths).length > 0) return; // 既に初期化済みならスキップ
+    // --- 楽譜の描画 (VexFlow) ---
+    function drawScore() {
+      const VF = Vex.Flow;
+      const container = document.getElementById("score-container");
+      container.innerHTML = ""; // 初期化
 
+      // レンダラーの作成 (レスポンシブに対応しやすいSVG)
+      const renderer = new VF.Renderer(container, VF.Renderer.Backends.SVG);
+      renderer.resize(350, 120);
+      const context = renderer.getContext();
+
+      // 五線譜（Stave）の作成
+      const stave = new VF.Stave(10, 0, 330);
+      stave.addClef("percussion").addTimeSignature("4/4");
+      stave.setContext(context).draw();
+
+      // 8小節目のフレーズ (Dropping Bombs)
+      // 1拍目: スネア(四分) | 2拍目: キック(四分) | 3拍目: スネア(八分2つ) | 4拍目: キック(四分)
+      const notes = [
+        new VF.StaveNote({ clef: "percussion", keys: ["c/5"], duration: "q" }), // Snare
+        new VF.StaveNote({ clef: "percussion", keys: ["f/4"], duration: "q" }), // Kick
+        new VF.StaveNote({ clef: "percussion", keys: ["c/5"], duration: "8" }), // Snare
+        new VF.StaveNote({ clef: "percussion", keys: ["c/5"], duration: "8" }), // Snare
+        new VF.StaveNote({ clef: "percussion", keys: ["f/4"], duration: "q" })  // Kick
+      ];
+
+      // 8分音符の連桁（ビーム）を自動生成
+      const beams = VF.Beam.generateBeams(notes);
+      
+      // 描画
+      VF.Formatter.FormatAndDraw(context, stave, notes);
+      beams.forEach(b => b.setContext(context).draw());
+    }
+
+    // 初回描画
+    drawScore();
+
+    // --- Tone.js セットアップ ---
+    function initSynths() {
+      if(Object.keys(synths).length > 0) return;
       synths = {
         kick: new Tone.MembraneSynth().toDestination(),
         snare: new Tone.NoiseSynth({
@@ -165,130 +153,105 @@
       };
     }
 
-    // --- UI Update Logic ---
-    function updateUI(bar, beat) {
-      // Bar Text
-      currentBarEl.textContent = bar;
+    // --- UI更新ロジック ---
+    function updateUI(bar) {
+      // 全てのハイライトを消す
+      bars.forEach(b => {
+        b.classList.remove('active-bar', 'fill-bar');
+        b.classList.add('border-gray-700', 'text-gray-500');
+      });
+
+      // 現在の小節をハイライト
+      const activeDiv = bars[bar - 1];
+      activeDiv.classList.remove('border-gray-700', 'text-gray-500');
       
-      // Colors based on section
-      const isFill = (bar === 8);
-      const mainColor = isFill ? 'text-orange-400' : 'text-gray-100';
-      currentBarEl.className = `text-8xl font-black tabular-nums transition-colors duration-200 ${mainColor}`;
-
-      // Status Badge
-      statusBadge.textContent = isFill ? 'Fill-in (Dropping Bombs)' : 'Comping';
-      statusBadge.className = `px-3 py-1 text-xs font-bold uppercase tracking-wider rounded-full transition-colors duration-300 ${
-        isFill ? 'bg-orange-500/20 text-orange-400 border-orange-500/30' : 'bg-blue-500/20 text-blue-400 border-blue-500/30'
-      }`;
-
-      // Beat Indicators
-      beats.forEach((b, index) => {
-        if (index === beat) {
-          const colorClass = isFill ? 'bg-orange-400 text-orange-400 active-beat' : 'bg-blue-400 text-blue-400 active-beat';
-          b.className = `w-3 h-3 rounded-full transition-all duration-100 ${colorClass}`;
-        } else {
-          b.className = 'w-3 h-3 rounded-full bg-gray-800 transition-all duration-100';
-        }
-      });
-
-      // Bar Visualizers
-      bars.forEach((b, index) => {
-        const barNum = index + 1;
-        if (bar === barNum) {
-          b.className = `h-2 rounded-full transition-all duration-300 ${barNum === 8 ? 'bg-orange-400' : 'bg-blue-400'}`;
-        } else {
-          b.className = 'h-2 rounded-full bg-gray-800 transition-all duration-300';
-        }
-      });
+      if (bar === 8) {
+        activeDiv.classList.add('fill-bar');
+        statusText.textContent = "Fill-in!";
+        statusText.className = "text-sm font-bold text-amber-500";
+      } else {
+        activeDiv.classList.add('active-bar');
+        statusText.textContent = "Comping";
+        statusText.className = "text-sm font-bold text-blue-400";
+      }
     }
 
-    function resetUI() {
-      currentBarEl.textContent = "1";
-      currentBarEl.className = "text-8xl font-black tabular-nums transition-colors duration-200 text-gray-100";
-      statusBadge.textContent = 'Comping';
-      statusBadge.className = "px-3 py-1 text-xs font-bold uppercase tracking-wider rounded-full bg-blue-500/20 text-blue-400 border-blue-500/30 transition-colors duration-300";
-      beats.forEach(b => b.className = 'w-3 h-3 rounded-full bg-gray-800 transition-all duration-100');
-      bars.forEach(b => b.className = 'h-2 rounded-full bg-gray-800 transition-all duration-300');
-    }
-
-    // --- Playback Logic ---
+    // --- 音楽再生ロジック ---
     async function togglePlayback() {
       if (isPlaying) {
-        // Stop
         Tone.Transport.stop();
         if (transportId !== null) Tone.Transport.clear(transportId);
         isPlaying = false;
         
-        // Update Button UI
-        playBtn.className = "w-full py-4 rounded-xl font-bold text-lg flex items-center justify-center gap-2 transition-all duration-200 bg-blue-500 text-white hover:bg-blue-600 hover:shadow-lg hover:shadow-blue-500/25 active:scale-[0.98]";
-        playIcon.classList.remove('hidden');
-        stopIcon.classList.add('hidden');
-        playText.textContent = "Start Practice";
-        resetUI();
+        playBtn.textContent = "START PRACTICE";
+        playBtn.className = "w-full py-4 rounded-xl font-bold text-lg transition-all duration-200 bg-blue-600 text-white hover:bg-blue-500 active:scale-[0.98] shadow-lg shadow-blue-900/50";
+        
+        // UIリセット
+        bars.forEach(b => {
+          b.classList.remove('active-bar', 'fill-bar');
+          b.classList.add('border-gray-700', 'text-gray-500');
+        });
+        statusText.textContent = "Ready";
 
       } else {
-        // Start
         await Tone.start();
         initSynths();
         
         Tone.Transport.bpm.value = currentBpm;
-        Tone.Transport.swing = 0.6; // ジャズのスイングフィール
+        Tone.Transport.swing = 0.55; // ジャズのスイングフィール
         Tone.Transport.swingSubdivision = "8n";
 
         let barCount = 1;
-        let beatCount = 0; // 0 to 3
+        let beatCount = 0;
 
         transportId = Tone.Transport.scheduleRepeat((time) => {
           const { kick, snare, ride, hihat } = synths;
           
-          // UI Update synchronously with audio
-          Tone.Draw.schedule(() => {
-            updateUI(barCount, beatCount);
-          }, time);
+          // UIを音のタイミングと同期して更新
+          if (beatCount === 0) {
+            Tone.Draw.schedule(() => updateUI(barCount), time);
+          }
 
-          // --- 音楽的ロジック ---
           if (barCount <= 7) {
-            // 【Bars 1-7】 Comping
-            ride.triggerAttackRelease("4n", time, 0.7); // 1, 2, 3, 4拍目
+            // 【1〜7小節目】 コンピング
+            ride.triggerAttackRelease("4n", time, 0.7); 
             
-            // ライドのスキップノート (2拍裏、4拍裏)
             if (beatCount === 1 || beatCount === 3) {
               ride.triggerAttackRelease("8n", time + Tone.Time("8n").toSeconds(), 0.4);
-              hihat.triggerAttackRelease("8n", time, 0.8); // ハイハット (2, 4拍目)
+              hihat.triggerAttackRelease("8n", time, 0.8); // 2, 4拍目のハイハット
             }
 
-            // フェザリング (4分音符で軽く踏むバスドラム)
-            kick.triggerAttackRelease("C1", "8n", time, 0.1);
+            kick.triggerAttackRelease("C1", "8n", time, 0.1); // フェザリング
 
-            // コンピングのバリエーション
             if (barCount % 2 === 0 && beatCount === 2) {
-              snare.triggerAttackRelease("8n", time + Tone.Time("8n").toSeconds(), 0.6); // 3拍裏
-            }
-            if (barCount % 4 === 0 && beatCount === 3) {
-              kick.triggerAttackRelease("C1", "8n", time, 0.7); // 4拍目アクセント
+              snare.triggerAttackRelease("8n", time + Tone.Time("8n").toSeconds(), 0.6); // 3拍裏のスネア
             }
 
           } else {
-            // 【Bar 8】 Bebop Fill (Dropping Bombs)
+            // 【8小節目】 フィル（楽譜と完全に一致するロジック）
+            // 1拍目: スネア(四分)
             if (beatCount === 0) {
-              snare.triggerAttackRelease("16n", time, 0.9);
+              snare.triggerAttackRelease("8n", time, 0.9);
               ride.triggerAttackRelease("4n", time, 0.8);
             }
+            // 2拍目: キック(四分)
             if (beatCount === 1) {
-              kick.triggerAttackRelease("C1", "8n", time, 1); // Bomb!
+              kick.triggerAttackRelease("C1", "8n", time, 1);
               hihat.triggerAttackRelease("8n", time, 0.7);
             }
+            // 3拍目: スネア(八分2つ)
             if (beatCount === 2) {
-              snare.triggerAttackRelease("16n", time, 0.7);
+              snare.triggerAttackRelease("16n", time, 0.8);
               snare.triggerAttackRelease("16n", time + Tone.Time("8n").toSeconds(), 0.8);
-            }
-            if (beatCount === 3) {
-              kick.triggerAttackRelease("C1", "8n", time, 0.9); // Bomb!
               ride.triggerAttackRelease("4n", time, 0.8);
+            }
+            // 4拍目: キック(四分)
+            if (beatCount === 3) {
+              kick.triggerAttackRelease("C1", "8n", time, 1);
+              hihat.triggerAttackRelease("8n", time, 0.7);
             }
           }
 
-          // カウンターの更新
           beatCount++;
           if (beatCount > 3) {
             beatCount = 0;
@@ -300,15 +263,12 @@
         Tone.Transport.start();
         isPlaying = true;
 
-        // Update Button UI
-        playBtn.className = "w-full py-4 rounded-xl font-bold text-lg flex items-center justify-center gap-2 transition-all duration-200 bg-red-500/10 text-red-500 border border-red-500/50 hover:bg-red-500/20 active:scale-[0.98]";
-        playIcon.classList.add('hidden');
-        stopIcon.classList.remove('hidden');
-        playText.textContent = "Stop";
+        playBtn.textContent = "STOP";
+        playBtn.className = "w-full py-4 rounded-xl font-bold text-lg transition-all duration-200 bg-red-500/20 text-red-500 border border-red-500/50 hover:bg-red-500/30 active:scale-[0.98]";
       }
     }
 
-    // --- Events ---
+    // --- イベントリスナー ---
     playBtn.addEventListener('click', togglePlayback);
     
     bpmSlider.addEventListener('input', (e) => {
