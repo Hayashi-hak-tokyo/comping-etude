@@ -388,15 +388,16 @@
         }
         
         let isStartOfLine = (i === 0 || i === 4);
-        let width = isStartOfLine ? 240 : 220; // 最初の小節は記号がある分少し広くする
+        let width = isStartOfLine ? 240 : 220;
         
         const stave = new VF.Stave(currentX, currentY, width);
         
-        // 音部記号と拍子記号は各段の頭のみ
         if(isStartOfLine) {
           stave.addClef("percussion").addTimeSignature("4/4");
+          // 段の頭の開始線を通常の単一線に設定
+          stave.setBegBarType(VF.Barline.type.SINGLE);
         } else {
-          // ★修正箇所: 2小節目以降は左端の開始線を描画しない（前の小節の終了線と繋げるため）
+          // 2小節目以降は左端の開始線を描画しない
           stave.setBegBarType(VF.Barline.type.NONE);
         }
 
@@ -406,7 +407,7 @@
         }
 
         staves.push(stave);
-        currentX += width; // 次の小節の開始位置をずらす
+        currentX += width;
 
         // Create Notes for this bar
         const barData = pattern.scoreNotes[i];
