@@ -85,11 +85,13 @@
     let isPlaying = false;
     let currentBpm = 120;
     
-    // メトロノーム音源 (Tone.js) - Jazz Drummer's Etude と同一の仕様
-    let clickHigh, clickLow;
+    // メトロノーム音源 & ドラム音源 (Tone.js)
+    let clickHigh, clickLow, kick, snare;
 
     function initAudio() {
       if(clickHigh) return;
+      
+      // 元のアプリと全く同じスクエア波のメトロノーム
       clickHigh = new Tone.Synth({
         oscillator: { type: "square" },
         envelope: { attack: 0.001, decay: 0.1, sustain: 0, release: 0.01 },
@@ -100,6 +102,17 @@
         oscillator: { type: "square" },
         envelope: { attack: 0.001, decay: 0.1, sustain: 0, release: 0.01 },
         volume: -10
+      }).toDestination();
+
+      // 追加：フレーズ確認用のスネアとキックの音源
+      kick = new Tone.MembraneSynth({
+        volume: 2
+      }).toDestination();
+
+      snare = new Tone.NoiseSynth({
+        noise: { type: "white" },
+        envelope: { attack: 0.001, decay: 0.2, sustain: 0 },
+        volume: 0
       }).toDestination();
     }
 
@@ -134,6 +147,48 @@
             clickHigh.triggerAttackRelease("A5", "32n", time);
           } else {
             clickLow.triggerAttackRelease("A4", "32n", time);
+          }
+
+          // 太鼓の音 (Snare & Kick) を楽譜のタイミングに合わせて鳴らす
+          const time8 = Tone.Time("8n").toSeconds();
+          const time16 = Tone.Time("16n").toSeconds();
+
+          if (barCount === 1) {
+             if (beatCount === 1) snare.triggerAttackRelease("16n", time + time8); // 2-and
+             if (beatCount === 3) kick.triggerAttackRelease("C1", "8n", time);      // 4
+          } else if (barCount === 2) {
+             if (beatCount === 0) kick.triggerAttackRelease("C1", "8n", time + time8); // 1-and
+             if (beatCount === 2) snare.triggerAttackRelease("16n", time);             // 3
+          } else if (barCount === 3) {
+             if (beatCount === 0) snare.triggerAttackRelease("16n", time + time8);     // 1-and
+             if (beatCount === 1) kick.triggerAttackRelease("C1", "8n", time + time8); // 2-and
+             if (beatCount === 3) snare.triggerAttackRelease("16n", time + time8);     // 4-and
+          } else if (barCount === 4) {
+             if (beatCount === 2) kick.triggerAttackRelease("C1", "8n", time + time8); // 3-and
+             if (beatCount === 3) snare.triggerAttackRelease("16n", time);             // 4
+          } else if (barCount === 5) {
+             if (beatCount === 1) kick.triggerAttackRelease("C1", "8n", time);         // 2
+             if (beatCount === 2) snare.triggerAttackRelease("16n", time);             // 3
+             if (beatCount === 3) kick.triggerAttackRelease("C1", "8n", time + time8); // 4-and
+          } else if (barCount === 6) {
+             if (beatCount === 0) snare.triggerAttackRelease("16n", time);             // 1
+             if (beatCount === 1) snare.triggerAttackRelease("16n", time + time8);     // 2-and
+             if (beatCount === 3) kick.triggerAttackRelease("C1", "8n", time);         // 4
+          } else if (barCount === 7) {
+             if (beatCount === 0) snare.triggerAttackRelease("16n", time + time8);     // 1-and
+             if (beatCount === 2) kick.triggerAttackRelease("C1", "8n", time);         // 3
+             if (beatCount === 3) snare.triggerAttackRelease("16n", time + time8);     // 4-and
+          } else if (barCount === 8) {
+             // Dropping Bombs (Beat 1 & 3: 16th Snare, Beat 2 & 4: Kick)
+             if (beatCount === 0 || beatCount === 2) {
+                 snare.triggerAttackRelease("16n", time);
+                 snare.triggerAttackRelease("16n", time + time16);
+                 snare.triggerAttackRelease("16n", time + time16 * 2);
+                 snare.triggerAttackRelease("16n", time + time16 * 3);
+             }
+             if (beatCount === 1 || beatCount === 3) {
+                 kick.triggerAttackRelease("C1", "8n", time);
+             }
           }
 
           // UI Update (小節の頭でトラッカーを更新)
