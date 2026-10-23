@@ -6,7 +6,7 @@
   <title>Jazz Drummer's Etude</title>
   <script src="https://cdn.tailwindcss.com"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/tone/14.8.49/Tone.js"></script>
-  <script src="https://unpkg.com/vexflow/releases/vexflow-debug.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/vexflow/3.0.9/vexflow-min.js"></script>
   <style>
     body { background-color: #f4f1ea; color: #1a1a1a; font-family: 'Inter', serif; }
     /* 教則本のようなクラシックな質感 */
@@ -143,11 +143,11 @@
           if (beat === 3) s.kick.triggerAttackRelease("C1", "8n", time + Tone.Time("8n").toSeconds(), 0.7); // 4拍裏
         },
         draw: (VF) => [
-          new VF.StaveNote({ clef: "percussion", keys: ["g/5/x2", "f/4"], duration: "q" }), // 1 (Ride)
-          new VF.StaveNote({ clef: "percussion", keys: ["g/5/x2", "d/4/x2"], duration: "8" }), // 2 (Ride, HH)
+          new VF.StaveNote({ clef: "percussion", keys: ["g/5/x", "f/4"], duration: "q" }), // 1 (Ride)
+          new VF.StaveNote({ clef: "percussion", keys: ["g/5/x", "d/4/x"], duration: "8" }), // 2 (Ride, HH)
           new VF.StaveNote({ clef: "percussion", keys: ["c/5"], duration: "8" }), // 2-and (Snare)
-          new VF.StaveNote({ clef: "percussion", keys: ["g/5/x2"], duration: "q" }), // 3 (Ride)
-          new VF.StaveNote({ clef: "percussion", keys: ["g/5/x2", "d/4/x2"], duration: "8" }), // 4 (Ride, HH)
+          new VF.StaveNote({ clef: "percussion", keys: ["g/5/x"], duration: "q" }), // 3 (Ride)
+          new VF.StaveNote({ clef: "percussion", keys: ["g/5/x", "d/4/x"], duration: "8" }), // 4 (Ride, HH)
           new VF.StaveNote({ clef: "percussion", keys: ["f/4"], duration: "8" })  // 4-and (Kick)
         ]
       },
@@ -161,12 +161,12 @@
           if(beat === 3) s.snare.triggerAttackRelease("8n", time, 0.7);
         },
         draw: (VF) => [
-          new VF.StaveNote({ clef: "percussion", keys: ["g/5/x2", "d/4/x2"], duration: "q" }), 
-          new VF.StaveNote({ clef: "percussion", keys: ["d/4/x2"], duration: "8" }), 
-          new VF.StaveNote({ clef: "percussion", keys: ["g/5/x2"], duration: "8" }), 
-          new VF.StaveNote({ clef: "percussion", keys: ["g/5/x2", "d/4/x2", "f/4"], duration: "q" }), 
-          new VF.StaveNote({ clef: "percussion", keys: ["d/4/x2", "c/5"], duration: "8" }), 
-          new VF.StaveNote({ clef: "percussion", keys: ["g/5/x2"], duration: "8" })
+          new VF.StaveNote({ clef: "percussion", keys: ["g/5/x", "d/4/x"], duration: "q" }), 
+          new VF.StaveNote({ clef: "percussion", keys: ["d/4/x"], duration: "8" }), 
+          new VF.StaveNote({ clef: "percussion", keys: ["g/5/x"], duration: "8" }), 
+          new VF.StaveNote({ clef: "percussion", keys: ["g/5/x", "d/4/x", "f/4"], duration: "q" }), 
+          new VF.StaveNote({ clef: "percussion", keys: ["d/4/x", "c/5"], duration: "8" }), 
+          new VF.StaveNote({ clef: "percussion", keys: ["g/5/x"], duration: "8" })
         ]
       },
       broken: {
@@ -178,12 +178,12 @@
           if(beat === 3) { s.kick.triggerAttackRelease("C1", "8n", time, 0.7); s.hihat.triggerAttackRelease("8n", time, 0.7); }
         },
         draw: (VF) => [
-          new VF.StaveNote({ clef: "percussion", keys: ["g/5/x2", "f/4"], duration: "q" }),
-          new VF.StaveNote({ clef: "percussion", keys: ["c/5", "d/4/x2"], duration: "8" }),
-          new VF.StaveNote({ clef: "percussion", keys: ["g/5/x2"], duration: "8" }),
-          new VF.StaveNote({ clef: "percussion", keys: ["g/5/x2"], duration: "8" }),
+          new VF.StaveNote({ clef: "percussion", keys: ["g/5/x", "f/4"], duration: "q" }),
+          new VF.StaveNote({ clef: "percussion", keys: ["c/5", "d/4/x"], duration: "8" }),
+          new VF.StaveNote({ clef: "percussion", keys: ["g/5/x"], duration: "8" }),
+          new VF.StaveNote({ clef: "percussion", keys: ["g/5/x"], duration: "8" }),
           new VF.StaveNote({ clef: "percussion", keys: ["c/5"], duration: "8" }),
-          new VF.StaveNote({ clef: "percussion", keys: ["f/4", "d/4/x2"], duration: "q" })
+          new VF.StaveNote({ clef: "percussion", keys: ["f/4", "d/4/x"], duration: "q" })
         ]
       }
     };
@@ -199,11 +199,11 @@
           if (beat === 3) { s.kick.triggerAttackRelease("C1", "8n", time, 1); s.ride.triggerAttackRelease("4n", time, 0.8); }
         },
         draw: (VF) => [
-          new VF.StaveNote({ clef: "percussion", keys: ["c/5", "g/5/x2"], duration: "q" }), // Snare+Ride
-          new VF.StaveNote({ clef: "percussion", keys: ["f/4", "d/4/x2"], duration: "q" }), // Kick+HH
+          new VF.StaveNote({ clef: "percussion", keys: ["c/5", "g/5/x"], duration: "q" }), // Snare+Ride
+          new VF.StaveNote({ clef: "percussion", keys: ["f/4", "d/4/x"], duration: "q" }), // Kick+HH
           new VF.StaveNote({ clef: "percussion", keys: ["c/5"], duration: "8" }), // Snare
           new VF.StaveNote({ clef: "percussion", keys: ["c/5"], duration: "8" }), // Snare
-          new VF.StaveNote({ clef: "percussion", keys: ["f/4", "g/5/x2"], duration: "q" })  // Kick+Ride
+          new VF.StaveNote({ clef: "percussion", keys: ["f/4", "g/5/x"], duration: "q" })  // Kick+Ride
         ]
       },
       threebeat: {
@@ -217,47 +217,52 @@
         },
         draw: (VF) => [
           new VF.StaveNote({ clef: "percussion", keys: ["c/5", "f/4"], duration: "8" }), // 1
-          new VF.StaveNote({ clef: "percussion", keys: ["g/5/x2"], duration: "8" }), // 1-and (rest/ride)
-          new VF.StaveNote({ clef: "percussion", keys: ["g/5/x2"], duration: "8" }), // 2
+          new VF.StaveNote({ clef: "percussion", keys: ["g/5/x"], duration: "8" }), // 1-and (rest/ride)
+          new VF.StaveNote({ clef: "percussion", keys: ["g/5/x"], duration: "8" }), // 2
           new VF.StaveNote({ clef: "percussion", keys: ["c/5", "f/4"], duration: "8" }), // 2-and
-          new VF.StaveNote({ clef: "percussion", keys: ["g/5/x2"], duration: "8" }), // 3
-          new VF.StaveNote({ clef: "percussion", keys: ["g/5/x2"], duration: "8" }), // 3-and
+          new VF.StaveNote({ clef: "percussion", keys: ["g/5/x"], duration: "8" }), // 3
+          new VF.StaveNote({ clef: "percussion", keys: ["g/5/x"], duration: "8" }), // 3-and
           new VF.StaveNote({ clef: "percussion", keys: ["c/5", "f/4"], duration: "8" }), // 4
-          new VF.StaveNote({ clef: "percussion", keys: ["g/5/x2"], duration: "8" })  // 4-and
+          new VF.StaveNote({ clef: "percussion", keys: ["g/5/x"], duration: "8" })  // 4-and
         ]
       }
     };
 
     // --- 楽譜の描画 (VexFlow) ---
     function drawScore() {
-      const VF = Vex.Flow;
-      const container = document.getElementById("score-container");
-      container.innerHTML = ""; // 初期化
+      try {
+        const VF = Vex.Flow;
+        const container = document.getElementById("score-container");
+        container.innerHTML = ""; // 初期化
 
-      const renderer = new VF.Renderer(container, VF.Renderer.Backends.SVG);
-      renderer.resize(600, 150);
-      const context = renderer.getContext();
+        const renderer = new VF.Renderer(container, VF.Renderer.Backends.SVG);
+        renderer.resize(600, 150);
+        const context = renderer.getContext();
 
-      // Comping Stave (左側)
-      const staveComping = new VF.Stave(10, 20, 280);
-      staveComping.addClef("percussion").addTimeSignature("4/4");
-      staveComping.setText("Comping (Bars 1-7)", VF.Modifier.Position.ABOVE);
-      staveComping.setContext(context).draw();
+        // Comping Stave (左側)
+        const staveComping = new VF.Stave(10, 20, 280);
+        staveComping.addClef("percussion").addTimeSignature("4/4");
+        staveComping.setText("Comping (Bars 1-7)", VF.Modifier.Position.ABOVE);
+        staveComping.setContext(context).draw();
 
-      const cNotes = compingData[compingSelect.value].draw(VF);
-      const cBeams = VF.Beam.generateBeams(cNotes);
-      VF.Formatter.FormatAndDraw(context, staveComping, cNotes);
-      cBeams.forEach(b => b.setContext(context).draw());
+        const cNotes = compingData[compingSelect.value].draw(VF);
+        const cBeams = VF.Beam.generateBeams(cNotes);
+        VF.Formatter.FormatAndDraw(context, staveComping, cNotes);
+        cBeams.forEach(b => b.setContext(context).draw());
 
-      // Fill Stave (右側)
-      const staveFill = new VF.Stave(300, 20, 280);
-      staveFill.setText("Fill-in (Bar 8)", VF.Modifier.Position.ABOVE);
-      staveFill.setContext(context).draw();
+        // Fill Stave (右側)
+        const staveFill = new VF.Stave(300, 20, 280);
+        staveFill.setText("Fill-in (Bar 8)", VF.Modifier.Position.ABOVE);
+        staveFill.setContext(context).draw();
 
-      const fNotes = fillData[fillSelect.value].draw(VF);
-      const fBeams = VF.Beam.generateBeams(fNotes);
-      VF.Formatter.FormatAndDraw(context, staveFill, fNotes);
-      fBeams.forEach(b => b.setContext(context).draw());
+        const fNotes = fillData[fillSelect.value].draw(VF);
+        const fBeams = VF.Beam.generateBeams(fNotes);
+        VF.Formatter.FormatAndDraw(context, staveFill, fNotes);
+        fBeams.forEach(b => b.setContext(context).draw());
+      } catch (e) {
+        console.error("VexFlow drawing error:", e);
+        document.getElementById("score-container").innerHTML = "<p class='text-red-500 font-bold p-4'>楽譜の描画に失敗しました。ライブラリの読み込みを確認してください。</p>";
+      }
     }
 
     // --- メインループ ---
