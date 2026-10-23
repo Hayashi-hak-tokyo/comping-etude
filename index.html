@@ -145,47 +145,96 @@
 
         Tone.Transport.scheduleRepeat((time) => {
           
+          // 4分音符の長さ
+          const quarter = Tone.Time("4n").toSeconds();
+          // スイングフィール（裏拍の位置を約67%後ろにズラす = 3連符の3個目）
+          const upbeat = quarter * 0.67;
+
           // メトロノームのクリック音 (1拍目だけ高い音)
           if (beatCount === 0) {
-            clickHigh.triggerAttackRelease("A5", "32n", time);
+            clickHigh.triggerAttackRelease("A5", "32n", time, 0.5);
           } else {
-            clickLow.triggerAttackRelease("A4", "32n", time);
-          }
-          if (beatCount === 1 || beatCount === 3) {
-              kick.triggerAttackRelease("C1", "8n", time);
-          }
-        }
-
-        // UI Update (毎拍トラッカーとカウントを更新)
-        Tone.Draw.schedule(() => {
-          const beatDisplay = document.getElementById('beat-display');
-          if (beatDisplay) {
-            beatDisplay.textContent = `${barCount}-${beatCount + 1}`;
+            clickLow.triggerAttackRelease("A4", "32n", time, 0.5);
           }
 
-          if (beatCount === 0) {
-            bars.forEach(b => {
-              b.classList.remove('active-bar', 'fill-bar');
-              b.classList.add('border-gray-200', 'text-gray-400', 'bg-gray-50');
-            });
-            
-            const activeDiv = bars[barCount - 1];
-            activeDiv.classList.remove('border-gray-200', 'text-gray-400', 'bg-gray-50');
-            
-            if (barCount === 8) {
-              activeDiv.classList.add('fill-bar');
-              statusText.textContent = "Bar 8: Fill-in";
-              statusText.className = "text-xs font-bold text-red-500 uppercase tracking-wider";
-            } else {
-              activeDiv.classList.add('active-bar');
-              statusText.textContent = `Bar ${barCount}: Comping`;
-              statusText.className = "text-xs font-bold text-blue-600 uppercase tracking-wider";
+          // --- ドラムの再生ロジック（ジョン・ライリーのフレーズ） ---
+          if (barCount === 1) {
+            if (beatCount === 1) snare.triggerAttackRelease("16n", time + upbeat, 0.8); // 2-and
+            if (beatCount === 3) kick.triggerAttackRelease("C1", "8n", time, 1.0);      // 4
+          }
+          else if (barCount === 2) {
+            if (beatCount === 0) kick.triggerAttackRelease("C1", "8n", time + upbeat, 1.0); // 1-and
+            if (beatCount === 2) snare.triggerAttackRelease("16n", time, 0.8);              // 3
+          }
+          else if (barCount === 3) {
+            if (beatCount === 0) snare.triggerAttackRelease("16n", time + upbeat, 0.8); // 1-and
+            if (beatCount === 1) kick.triggerAttackRelease("C1", "8n", time + upbeat, 1.0); // 2-and
+            if (beatCount === 3) snare.triggerAttackRelease("16n", time + upbeat, 0.8); // 4-and
+          }
+          else if (barCount === 4) {
+            if (beatCount === 2) kick.triggerAttackRelease("C1", "8n", time + upbeat, 1.0); // 3-and
+            if (beatCount === 3) snare.triggerAttackRelease("16n", time, 0.8);              // 4
+          }
+          else if (barCount === 5) {
+            if (beatCount === 1) kick.triggerAttackRelease("C1", "8n", time, 1.0);          // 2
+            if (beatCount === 2) snare.triggerAttackRelease("16n", time, 0.8);              // 3
+            if (beatCount === 3) kick.triggerAttackRelease("C1", "8n", time + upbeat, 1.0); // 4-and
+          }
+          else if (barCount === 6) {
+            if (beatCount === 0) snare.triggerAttackRelease("16n", time, 0.8);              // 1
+            if (beatCount === 1) snare.triggerAttackRelease("16n", time + upbeat, 0.8); // 2-and
+            if (beatCount === 3) kick.triggerAttackRelease("C1", "8n", time, 1.0);          // 4
+          }
+          else if (barCount === 7) {
+            if (beatCount === 0) snare.triggerAttackRelease("16n", time + upbeat, 0.8); // 1-and
+            if (beatCount === 2) kick.triggerAttackRelease("C1", "8n", time, 1.0);          // 3
+            if (beatCount === 3) snare.triggerAttackRelease("16n", time + upbeat, 0.8); // 4-and
+          }
+          else if (barCount === 8) {
+            // Bar 8 (Fill): 16th Snare on 1 & 3, Kick on 2 & 4
+            // 16分音符はスイングさせず均等に割る（ビバップ特有のストレートなニュアンス）
+            const sixteenth = quarter / 4;
+            if (beatCount === 0 || beatCount === 2) {
+              snare.triggerAttackRelease("16n", time, 0.8);
+              snare.triggerAttackRelease("16n", time + sixteenth, 0.8);
+              snare.triggerAttackRelease("16n", time + sixteenth * 2, 0.8);
+              snare.triggerAttackRelease("16n", time + sixteenth * 3, 0.8);
+            }
+            if (beatCount === 1 || beatCount === 3) {
+              kick.triggerAttackRelease("C1", "8n", time, 1.2);
             }
           }
-        }, time);
 
-        beatCount++;
-        if (beatCount > 3) {
+          // UI Update (毎拍トラッカーとカウントを更新)
+          Tone.Draw.schedule(() => {
+            const beatDisplay = document.getElementById('beat-display');
+            if (beatDisplay) {
+              beatDisplay.textContent = `${barCount}-${beatCount + 1}`;
+            }
+
+            if (beatCount === 0) {
+              bars.forEach(b => {
+                b.classList.remove('active-bar', 'fill-bar');
+                b.classList.add('border-gray-200', 'text-gray-400', 'bg-gray-50');
+              });
+              
+              const activeDiv = bars[barCount - 1];
+              activeDiv.classList.remove('border-gray-200', 'text-gray-400', 'bg-gray-50');
+              
+              if (barCount === 8) {
+                activeDiv.classList.add('fill-bar');
+                statusText.textContent = "Bar 8: Fill-in";
+                statusText.className = "text-xs font-bold text-red-500 uppercase tracking-wider";
+              } else {
+                activeDiv.classList.add('active-bar');
+                statusText.textContent = `Bar ${barCount}: Comping`;
+                statusText.className = "text-xs font-bold text-blue-600 uppercase tracking-wider";
+              }
+            }
+          }, time);
+
+          beatCount++;
+          if (beatCount > 3) {
             beatCount = 0;
             barCount++;
             if (barCount > 8) barCount = 1; // 8小節ループ
