@@ -8,85 +8,58 @@
   <script src="https://cdnjs.cloudflare.com/ajax/libs/tone/14.8.49/Tone.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/vexflow/3.0.9/vexflow-min.js"></script>
   <style>
-    body { background-color: #f4f1ea; color: #1a1a1a; font-family: 'Inter', serif; }
-    /* 教則本のようなクラシックな質感 */
+    body { background-color: #fdfcf8; color: #1a1a1a; font-family: 'Inter', serif; }
     .book-page {
-      background-color: #fdfcf8;
-      border: 1px solid #d1ccc0;
-      box-shadow: 0 10px 30px rgba(0,0,0,0.05);
+      background-color: #ffffff;
+      border: 1px solid #e5e5e5;
+      box-shadow: 0 10px 30px rgba(0,0,0,0.03);
     }
     .active-bar { background-color: #3b82f6; color: white; border-color: #3b82f6; }
-    .fill-bar { background-color: #eab308; color: white; border-color: #eab308; }
+    .fill-bar { background-color: #ef4444; color: white; border-color: #ef4444; }
     #score-container svg { max-width: 100%; height: auto; }
   </style>
 </head>
-<body class="min-h-screen flex flex-col items-center py-8 px-4">
+<body class="min-h-screen flex flex-col items-center py-10 px-4">
 
-  <div class="max-w-3xl w-full space-y-6">
+  <div class="max-w-4xl w-full space-y-6">
     
     <!-- ヘッダー -->
-    <div class="text-center space-y-2 border-b-2 border-gray-300 pb-4">
-      <h1 class="text-4xl font-bold tracking-tight text-gray-900" style="font-family: 'Times New Roman', Times, serif;">Beyond Bop Practice</h1>
-      <p class="text-gray-600 font-medium">Interactive Phrase Collection: 7-Bar Comping & 1-Bar Fill</p>
+    <div class="text-center border-b-2 border-gray-200 pb-6 mb-8">
+      <h1 class="text-4xl font-bold tracking-tight text-gray-900" style="font-family: 'Times New Roman', Times, serif;">Beyond Bop Etude</h1>
+      <p class="text-gray-500 mt-2 font-medium">8-Bar Practice: Snare & Kick Comping (Bars 1-7) + Fill-in (Bar 8)</p>
     </div>
 
     <!-- コントロールパネル -->
-    <div class="book-page p-6 rounded-xl space-y-6">
-      <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-        
-        <!-- コンピング選択 -->
-        <div class="space-y-2">
-          <label class="text-sm font-bold text-gray-700 uppercase tracking-wider">Comping Concept (Bars 1-7)</label>
-          <select id="comping-select" class="w-full p-3 bg-white border border-gray-300 rounded-lg shadow-sm focus:ring-2 focus:ring-blue-500 font-medium">
-            <option value="basic">1. Three-Voice Comping in 8th-notes</option>
-            <option value="tony">2. Quarter-notes with the Hi-hat (Tony W.)</option>
-            <option value="broken">3. Broken-Time Feel (Roy Haynes style)</option>
-          </select>
+    <div class="book-page p-6 rounded-xl flex flex-col md:flex-row items-center gap-6">
+      
+      <div class="flex-1 w-full space-y-2">
+        <div class="flex justify-between items-end">
+          <span class="font-bold text-gray-700 text-sm uppercase tracking-wider">Metronome (BPM)</span>
+          <span id="bpm-display" class="font-bold text-3xl text-blue-600">120</span>
         </div>
-
-        <!-- フィル選択 -->
-        <div class="space-y-2">
-          <label class="text-sm font-bold text-gray-700 uppercase tracking-wider">Fill-in Concept (Bar 8)</label>
-          <select id="fill-select" class="w-full p-3 bg-white border border-gray-300 rounded-lg shadow-sm focus:ring-2 focus:ring-blue-500 font-medium">
-            <option value="bombs">A. Classic Bebop (Dropping Bombs)</option>
-            <option value="threebeat">B. Three-beat Phrases (Cross-rhythm)</option>
-          </select>
-        </div>
+        <input type="range" id="bpm-slider" min="60" max="250" step="1" value="120" class="w-full accent-blue-600 h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer" />
       </div>
 
-      <!-- BPM & 再生ボタン -->
-      <div class="flex items-center gap-6 pt-4 border-t border-gray-200">
-        <div class="flex-1 space-y-2">
-          <div class="flex justify-between">
-            <span class="font-bold text-gray-700 text-sm">Tempo (BPM)</span>
-            <span id="bpm-display" class="font-bold text-blue-600">160</span>
-          </div>
-          <input type="range" id="bpm-slider" min="80" max="280" step="1" value="160" class="w-full accent-blue-600" />
-        </div>
-        <button id="play-btn" class="px-8 py-4 rounded-xl font-bold text-lg text-white bg-blue-600 hover:bg-blue-700 transition-all shadow-md w-48">
-          START
-        </button>
-      </div>
+      <button id="play-btn" class="w-full md:w-48 py-4 rounded-xl font-bold text-lg text-white bg-blue-600 hover:bg-blue-700 transition-all shadow-md">
+        START CLICK
+      </button>
     </div>
 
     <!-- 小節トラッカー -->
-    <div class="book-page p-4 rounded-xl">
-      <div class="flex justify-between items-center mb-2 px-2">
-        <span class="text-xs font-bold text-gray-500 uppercase tracking-wider">Phrase Tracker</span>
-        <span id="status-text" class="text-xs font-bold text-blue-600 uppercase">Comping</span>
+    <div class="book-page p-5 rounded-xl space-y-3">
+      <div class="flex justify-between items-center px-1">
+        <span class="text-xs font-bold text-gray-400 uppercase tracking-wider">Phrase Tracker</span>
+        <span id="status-text" class="text-xs font-bold text-blue-600 uppercase">Ready</span>
       </div>
       <div class="grid grid-cols-8 gap-2" id="bar-tracker">
         <!-- JSで生成 -->
       </div>
     </div>
 
-    <!-- 楽譜表示エリア (VexFlow) -->
-    <div class="book-page p-6 rounded-xl flex flex-col items-center">
-      <h3 class="w-full text-left font-bold text-gray-800 border-b border-gray-200 pb-2 mb-4" style="font-family: 'Times New Roman', Times, serif;">
-        Notation (Basic Motif)
-      </h3>
-      <div id="score-container" class="w-full flex justify-center overflow-x-auto"></div>
-      <p class="text-xs text-gray-500 mt-4 text-center">※表示されているのは各コンセプトの基本となる1小節のモチーフです。</p>
+    <!-- 楽譜表示エリア -->
+    <div class="book-page p-6 rounded-xl flex flex-col items-center overflow-x-auto">
+      <div id="score-container" class="w-full flex justify-center min-w-[800px]"></div>
+      <p class="text-sm text-gray-500 mt-6 text-center">※ライドとハイハットは4/4ジャズパターンをキープし、記譜されたスネアとキックを演奏してください。</p>
     </div>
 
   </div>
@@ -96,8 +69,6 @@
     const playBtn = document.getElementById('play-btn');
     const bpmSlider = document.getElementById('bpm-slider');
     const bpmDisplay = document.getElementById('bpm-display');
-    const compingSelect = document.getElementById('comping-select');
-    const fillSelect = document.getElementById('fill-select');
     const barTracker = document.getElementById('bar-tracker');
     const statusText = document.getElementById('status-text');
 
@@ -105,237 +76,103 @@
     const bars = [];
     for(let i = 1; i <= 8; i++) {
       const div = document.createElement('div');
-      div.className = 'h-10 flex items-center justify-center rounded border border-gray-300 text-gray-400 font-bold text-sm bg-gray-50 transition-all';
+      div.className = 'h-12 flex items-center justify-center rounded-lg border-2 border-gray-200 text-gray-400 font-bold text-lg bg-gray-50 transition-all duration-75';
       div.textContent = i;
       barTracker.appendChild(div);
       bars.push(div);
     }
 
     let isPlaying = false;
-    let synths = {};
-    let currentBpm = 160;
-
-    // --- 音源の初期化 ---
-    function initSynths() {
-      if(Object.keys(synths).length > 0) return;
-      synths = {
-        kick: new Tone.MembraneSynth({ pitchDecay: 0.05, octaves: 4, envelope: { attack: 0.001, decay: 0.4, sustain: 0.01, release: 0.1 } }).toDestination(),
-        snare: new Tone.NoiseSynth({ noise: { type: "white" }, envelope: { attack: 0.001, decay: 0.2, sustain: 0 }, volume: -5 }).toDestination(),
-        ride: new Tone.MetalSynth({ frequency: 250, envelope: { attack: 0.001, decay: 1.4, release: 0.2 }, harmonicity: 5.1, modulationIndex: 32, resonance: 4000, octaves: 1.5, volume: -8 }).toDestination(),
-        hihat: new Tone.MetalSynth({ frequency: 400, envelope: { attack: 0.001, decay: 0.1, release: 0.01 }, harmonicity: 5.1, modulationIndex: 32, resonance: 4000, octaves: 1.5, volume: -10 }).toDestination(),
-        crossStick: new Tone.MembraneSynth({ pitchDecay: 0.01, octaves: 1, envelope: { attack: 0.001, decay: 0.1, sustain: 0 }, volume: -2 }).toDestination()
-      };
-    }
-
-    // --- フレーズのデータ定義 (Tone.js再生ロジック ＆ VexFlow描画データ) ---
+    let currentBpm = 120;
     
-    // 【コンピングパターン】
-    const compingData = {
-      basic: {
-        // 3-Voice Comping: スネアのシンコペーションとバスドラムの絡み
-        play: (time, beat, s) => {
-          s.ride.triggerAttackRelease("4n", time, 0.7);
-          if (beat === 1 || beat === 3) {
-            s.ride.triggerAttackRelease("8n", time + Tone.Time("8n").toSeconds(), 0.4);
-            s.hihat.triggerAttackRelease("8n", time, 0.8);
-          }
-          if (beat === 1) s.snare.triggerAttackRelease("8n", time + Tone.Time("8n").toSeconds(), 0.6); // 2拍裏
-          if (beat === 3) s.kick.triggerAttackRelease("C1", "8n", time + Tone.Time("8n").toSeconds(), 0.7); // 4拍裏
-        },
-        draw: (VF) => [
-          new VF.StaveNote({ clef: "percussion", keys: ["g/5/x", "f/4"], duration: "q" }), // 1 (Ride)
-          new VF.StaveNote({ clef: "percussion", keys: ["g/5/x", "d/4/x"], duration: "8" }), // 2 (Ride, HH)
-          new VF.StaveNote({ clef: "percussion", keys: ["c/5"], duration: "8" }), // 2-and (Snare)
-          new VF.StaveNote({ clef: "percussion", keys: ["g/5/x"], duration: "q" }), // 3 (Ride)
-          new VF.StaveNote({ clef: "percussion", keys: ["g/5/x", "d/4/x"], duration: "8" }), // 4 (Ride, HH)
-          new VF.StaveNote({ clef: "percussion", keys: ["f/4"], duration: "8" })  // 4-and (Kick)
-        ]
-      },
-      tony: {
-        // Tony Williams: 4分音符のハイハット
-        play: (time, beat, s) => {
-          s.hihat.triggerAttackRelease("8n", time, 0.9); // HH on 1,2,3,4
-          if(beat === 0 || beat === 2) s.ride.triggerAttackRelease("4n", time, 0.7);
-          if(beat === 1 || beat === 3) s.ride.triggerAttackRelease("8n", time + Tone.Time("8n").toSeconds(), 0.5); // Ride skip
-          if(beat === 2) s.kick.triggerAttackRelease("C1", "8n", time, 0.8);
-          if(beat === 3) s.snare.triggerAttackRelease("8n", time, 0.7);
-        },
-        draw: (VF) => [
-          new VF.StaveNote({ clef: "percussion", keys: ["g/5/x", "d/4/x"], duration: "q" }), 
-          new VF.StaveNote({ clef: "percussion", keys: ["d/4/x"], duration: "8" }), 
-          new VF.StaveNote({ clef: "percussion", keys: ["g/5/x"], duration: "8" }), 
-          new VF.StaveNote({ clef: "percussion", keys: ["g/5/x", "d/4/x", "f/4"], duration: "q" }), 
-          new VF.StaveNote({ clef: "percussion", keys: ["d/4/x", "c/5"], duration: "8" }), 
-          new VF.StaveNote({ clef: "percussion", keys: ["g/5/x"], duration: "8" })
-        ]
-      },
-      broken: {
-        // Broken Time: ライドを崩し、スネアと対話
-        play: (time, beat, s) => {
-          if(beat === 0) { s.ride.triggerAttackRelease("4n", time, 0.7); s.kick.triggerAttackRelease("C1", "8n", time, 0.6); }
-          if(beat === 1) { s.snare.triggerAttackRelease("8n", time, 0.7); s.ride.triggerAttackRelease("8n", time + Tone.Time("8n").toSeconds(), 0.5); s.hihat.triggerAttackRelease("8n", time, 0.7); }
-          if(beat === 2) { s.ride.triggerAttackRelease("4n", time, 0.7); s.snare.triggerAttackRelease("8n", time + Tone.Time("8n").toSeconds(), 0.5); }
-          if(beat === 3) { s.kick.triggerAttackRelease("C1", "8n", time, 0.7); s.hihat.triggerAttackRelease("8n", time, 0.7); }
-        },
-        draw: (VF) => [
-          new VF.StaveNote({ clef: "percussion", keys: ["g/5/x", "f/4"], duration: "q" }),
-          new VF.StaveNote({ clef: "percussion", keys: ["c/5", "d/4/x"], duration: "8" }),
-          new VF.StaveNote({ clef: "percussion", keys: ["g/5/x"], duration: "8" }),
-          new VF.StaveNote({ clef: "percussion", keys: ["g/5/x"], duration: "8" }),
-          new VF.StaveNote({ clef: "percussion", keys: ["c/5"], duration: "8" }),
-          new VF.StaveNote({ clef: "percussion", keys: ["f/4", "d/4/x"], duration: "q" })
-        ]
-      }
-    };
+    // メトロノーム音源 (Tone.js)
+    let clickHigh, clickLow;
 
-    // 【フィルインパターン (Bar 8)】
-    const fillData = {
-      bombs: {
-        // Dropping Bombs: スネアとキックのコンビネーション
-        play: (time, beat, s) => {
-          if (beat === 0) { s.snare.triggerAttackRelease("16n", time, 0.9); s.ride.triggerAttackRelease("4n", time, 0.8); }
-          if (beat === 1) { s.kick.triggerAttackRelease("C1", "8n", time, 1); s.hihat.triggerAttackRelease("8n", time, 0.7); }
-          if (beat === 2) { s.snare.triggerAttackRelease("16n", time, 0.7); s.snare.triggerAttackRelease("16n", time + Tone.Time("8n").toSeconds(), 0.8); }
-          if (beat === 3) { s.kick.triggerAttackRelease("C1", "8n", time, 1); s.ride.triggerAttackRelease("4n", time, 0.8); }
-        },
-        draw: (VF) => [
-          new VF.StaveNote({ clef: "percussion", keys: ["c/5", "g/5/x"], duration: "q" }), // Snare+Ride
-          new VF.StaveNote({ clef: "percussion", keys: ["f/4", "d/4/x"], duration: "q" }), // Kick+HH
-          new VF.StaveNote({ clef: "percussion", keys: ["c/5"], duration: "8" }), // Snare
-          new VF.StaveNote({ clef: "percussion", keys: ["c/5"], duration: "8" }), // Snare
-          new VF.StaveNote({ clef: "percussion", keys: ["f/4", "g/5/x"], duration: "q" })  // Kick+Ride
-        ]
-      },
-      threebeat: {
-        // 3-Beat Phrase: 3拍フレーズのポリリズム的アプローチ
-        play: (time, beat, s) => {
-          // 4/4の中で 3拍 + 3拍 + 2拍 のアクセント
-          s.hihat.triggerAttackRelease("8n", time, 0.5); // 刻み
-          if (beat === 0) { s.snare.triggerAttackRelease("8n", time, 0.9); s.kick.triggerAttackRelease("C1", "8n", time, 0.9); }
-          if (beat === 1) { s.snare.triggerAttackRelease("8n", time + Tone.Time("8n").toSeconds(), 0.9); s.kick.triggerAttackRelease("C1", "8n", time + Tone.Time("8n").toSeconds(), 0.9); }
-          if (beat === 3) { s.snare.triggerAttackRelease("8n", time, 0.9); s.kick.triggerAttackRelease("C1", "8n", time, 0.9); }
-        },
-        draw: (VF) => [
-          new VF.StaveNote({ clef: "percussion", keys: ["c/5", "f/4"], duration: "8" }), // 1
-          new VF.StaveNote({ clef: "percussion", keys: ["g/5/x"], duration: "8" }), // 1-and (rest/ride)
-          new VF.StaveNote({ clef: "percussion", keys: ["g/5/x"], duration: "8" }), // 2
-          new VF.StaveNote({ clef: "percussion", keys: ["c/5", "f/4"], duration: "8" }), // 2-and
-          new VF.StaveNote({ clef: "percussion", keys: ["g/5/x"], duration: "8" }), // 3
-          new VF.StaveNote({ clef: "percussion", keys: ["g/5/x"], duration: "8" }), // 3-and
-          new VF.StaveNote({ clef: "percussion", keys: ["c/5", "f/4"], duration: "8" }), // 4
-          new VF.StaveNote({ clef: "percussion", keys: ["g/5/x"], duration: "8" })  // 4-and
-        ]
-      }
-    };
-
-    // --- 楽譜の描画 (VexFlow) ---
-    function drawScore() {
-      try {
-        const VF = Vex.Flow;
-        const container = document.getElementById("score-container");
-        container.innerHTML = ""; // 初期化
-
-        const renderer = new VF.Renderer(container, VF.Renderer.Backends.SVG);
-        renderer.resize(600, 150);
-        const context = renderer.getContext();
-
-        // Comping Stave (左側)
-        const staveComping = new VF.Stave(10, 20, 280);
-        staveComping.addClef("percussion").addTimeSignature("4/4");
-        staveComping.setText("Comping (Bars 1-7)", VF.Modifier.Position.ABOVE);
-        staveComping.setContext(context).draw();
-
-        const cNotes = compingData[compingSelect.value].draw(VF);
-        const cBeams = VF.Beam.generateBeams(cNotes);
-        VF.Formatter.FormatAndDraw(context, staveComping, cNotes);
-        cBeams.forEach(b => b.setContext(context).draw());
-
-        // Fill Stave (右側)
-        const staveFill = new VF.Stave(300, 20, 280);
-        staveFill.setText("Fill-in (Bar 8)", VF.Modifier.Position.ABOVE);
-        staveFill.setContext(context).draw();
-
-        const fNotes = fillData[fillSelect.value].draw(VF);
-        const fBeams = VF.Beam.generateBeams(fNotes);
-        VF.Formatter.FormatAndDraw(context, staveFill, fNotes);
-        fBeams.forEach(b => b.setContext(context).draw());
-      } catch (e) {
-        console.error("VexFlow drawing error:", e);
-        document.getElementById("score-container").innerHTML = "<p class='text-red-500 font-bold p-4'>楽譜の描画に失敗しました。ライブラリの読み込みを確認してください。</p>";
-      }
+    function initAudio() {
+      if(clickHigh) return;
+      // 鋭いクリック音を作成
+      clickHigh = new Tone.Synth({
+        oscillator: { type: "square" },
+        envelope: { attack: 0.001, decay: 0.1, sustain: 0, release: 0.01 },
+        volume: -5
+      }).toDestination();
+      
+      clickLow = new Tone.Synth({
+        oscillator: { type: "square" },
+        envelope: { attack: 0.001, decay: 0.1, sustain: 0, release: 0.01 },
+        volume: -10
+      }).toDestination();
     }
 
-    // --- メインループ ---
+    // --- メインループ (4分音符のメトロノーム) ---
     async function togglePlayback() {
       if (isPlaying) {
         Tone.Transport.stop();
         Tone.Transport.cancel();
         isPlaying = false;
         
-        playBtn.textContent = "START";
-        playBtn.className = "px-8 py-4 rounded-xl font-bold text-lg text-white bg-blue-600 hover:bg-blue-700 transition-all shadow-md w-48";
+        playBtn.textContent = "START CLICK";
+        playBtn.className = "w-full md:w-48 py-4 rounded-xl font-bold text-lg text-white bg-blue-600 hover:bg-blue-700 transition-all shadow-md";
         
         bars.forEach(b => {
           b.classList.remove('active-bar', 'fill-bar');
-          b.classList.add('border-gray-300', 'text-gray-400', 'bg-gray-50');
+          b.classList.add('border-gray-200', 'text-gray-400', 'bg-gray-50');
         });
         statusText.textContent = "Ready";
 
       } else {
         await Tone.start();
-        initSynths();
+        initAudio();
         
         Tone.Transport.bpm.value = currentBpm;
-        Tone.Transport.swing = 0.55; 
-        Tone.Transport.swingSubdivision = "8n";
 
         let barCount = 1;
-        let beatCount = 0;
-        const compPattern = compingData[compingSelect.value].play;
-        const fillPattern = fillData[fillSelect.value].play;
+        let beatCount = 0; // 0, 1, 2, 3 (4分音符)
 
         Tone.Transport.scheduleRepeat((time) => {
-          // UI Update
+          
+          // メトロノームのクリック音 (1拍目だけ高い音)
+          if (beatCount === 0) {
+            clickHigh.triggerAttackRelease("A5", "32n", time);
+          } else {
+            clickLow.triggerAttackRelease("A4", "32n", time);
+          }
+
+          // UI Update (小節の頭でトラッカーを更新)
           if (beatCount === 0) {
             Tone.Draw.schedule(() => {
               bars.forEach(b => {
                 b.classList.remove('active-bar', 'fill-bar');
-                b.classList.add('border-gray-300', 'text-gray-400', 'bg-gray-50');
+                b.classList.add('border-gray-200', 'text-gray-400', 'bg-gray-50');
               });
+              
               const activeDiv = bars[barCount - 1];
-              activeDiv.classList.remove('border-gray-300', 'text-gray-400', 'bg-gray-50');
+              activeDiv.classList.remove('border-gray-200', 'text-gray-400', 'bg-gray-50');
               
               if (barCount === 8) {
                 activeDiv.classList.add('fill-bar');
-                statusText.textContent = "Fill-in!";
-                statusText.className = "text-xs font-bold text-yellow-600 uppercase";
+                statusText.textContent = "Bar 8: Fill-in";
+                statusText.className = "text-xs font-bold text-red-500 uppercase tracking-wider";
               } else {
                 activeDiv.classList.add('active-bar');
-                statusText.textContent = "Comping";
-                statusText.className = "text-xs font-bold text-blue-600 uppercase";
+                statusText.textContent = `Bar ${barCount}: Comping`;
+                statusText.className = "text-xs font-bold text-blue-600 uppercase tracking-wider";
               }
             }, time);
-          }
-
-          // 音の再生
-          if (barCount <= 7) {
-            compPattern(time, beatCount, synths);
-          } else {
-            fillPattern(time, beatCount, synths);
           }
 
           beatCount++;
           if (beatCount > 3) {
             beatCount = 0;
             barCount++;
-            if (barCount > 8) barCount = 1;
+            if (barCount > 8) barCount = 1; // 8小節ループ
           }
         }, "4n");
 
         Tone.Transport.start();
         isPlaying = true;
         playBtn.textContent = "STOP";
-        playBtn.className = "px-8 py-4 rounded-xl font-bold text-lg text-red-600 bg-red-100 border border-red-300 hover:bg-red-200 transition-all shadow-md w-48";
+        playBtn.className = "w-full md:w-48 py-4 rounded-xl font-bold text-lg text-red-600 bg-red-100 hover:bg-red-200 transition-all shadow-md";
       }
     }
 
@@ -350,8 +187,80 @@
       }
     });
 
-    compingSelect.addEventListener('change', drawScore);
-    fillSelect.addEventListener('change', drawScore);
+    // --- 楽譜の描画 (VexFlow) ---
+    function drawScore() {
+      const VF = Vex.Flow;
+      const container = document.getElementById("score-container");
+      container.innerHTML = ""; 
+
+      const renderer = new VF.Renderer(container, VF.Renderer.Backends.SVG);
+      renderer.resize(850, 300); // 2段表示のための高さ
+      const context = renderer.getContext();
+
+      // 音符生成のヘルパー (Snare: c/5, Kick: f/4, Rest: b/4)
+      const n = (keys, duration) => new VF.StaveNote({ clef: "percussion", keys: keys, duration: duration });
+
+      // 【1〜4小節目】(上段)
+      const stave1 = new VF.Stave(10, 20, 240).addClef("percussion").addTimeSignature("4/4");
+      const stave2 = new VF.Stave(stave1.width + stave1.x, 20, 190);
+      const stave3 = new VF.Stave(stave2.width + stave2.x, 20, 190);
+      const stave4 = new VF.Stave(stave3.width + stave3.x, 20, 190);
+
+      // Bar 1: Snare on 2-and
+      const notes1 = [ n(["b/4"], "qr"), n(["c/5"], "8"), n(["b/4"], "8r"), n(["b/4"], "hr") ];
+      // Bar 2: Kick on 4-and
+      const notes2 = [ n(["b/4"], "hr"), n(["b/4"], "qr"), n(["b/4"], "8r"), n(["f/4"], "8") ];
+      // Bar 3: Snare on 2, Kick on 3-and
+      const notes3 = [ n(["b/4"], "qr"), n(["c/5"], "q"), n(["b/4"], "8r"), n(["f/4"], "8"), n(["b/4"], "qr") ];
+      // Bar 4: Snare on 1-and, Kick on 4
+      const notes4 = [ n(["b/4"], "8r"), n(["c/5"], "8"), n(["b/4"], "qr"), n(["b/4"], "qr"), n(["f/4"], "q") ];
+
+      [stave1, stave2, stave3, stave4].forEach(s => s.setContext(context).draw());
+      
+      VF.Formatter.FormatAndDraw(context, stave1, notes1);
+      VF.Formatter.FormatAndDraw(context, stave2, notes2);
+      VF.Formatter.FormatAndDraw(context, stave3, notes3);
+      VF.Formatter.FormatAndDraw(context, stave4, notes4);
+
+      // 上段の連桁(ビーム)
+      VF.Beam.generateBeams(notes1).forEach(b => b.setContext(context).draw());
+      VF.Beam.generateBeams(notes2).forEach(b => b.setContext(context).draw());
+      VF.Beam.generateBeams(notes3).forEach(b => b.setContext(context).draw());
+      VF.Beam.generateBeams(notes4).forEach(b => b.setContext(context).draw());
+
+      // 【5〜8小節目】(下段)
+      const stave5 = new VF.Stave(10, 150, 240).addClef("percussion");
+      const stave6 = new VF.Stave(stave5.width + stave5.x, 150, 190);
+      const stave7 = new VF.Stave(stave6.width + stave6.x, 150, 190);
+      const stave8 = new VF.Stave(stave7.width + stave7.x, 150, 200);
+      
+      // Bar 5: Snare on 3
+      const notes5 = [ n(["b/4"], "hr"), n(["c/5"], "q"), n(["b/4"], "qr") ];
+      // Bar 6: Kick on 2-and, Snare on 4-and
+      const notes6 = [ n(["b/4"], "qr"), n(["b/4"], "8r"), n(["f/4"], "8"), n(["b/4"], "qr"), n(["b/4"], "8r"), n(["c/5"], "8") ];
+      // Bar 7: Kick on 1-and, Snare on 3-and
+      const notes7 = [ n(["b/4"], "8r"), n(["f/4"], "8"), n(["b/4"], "qr"), n(["b/4"], "8r"), n(["c/5"], "8"), n(["b/4"], "qr") ];
+      // Bar 8 (Fill): Dropping Bombs (16th Snare on 1 & 3, Kick on 2 & 4)
+      const notes8 = [ 
+        n(["c/5"], "16"), n(["c/5"], "16"), n(["c/5"], "16"), n(["c/5"], "16"), // Beat 1
+        n(["f/4"], "q"), // Beat 2
+        n(["c/5"], "16"), n(["c/5"], "16"), n(["c/5"], "16"), n(["c/5"], "16"), // Beat 3
+        n(["f/4"], "q")  // Beat 4
+      ];
+
+      [stave5, stave6, stave7, stave8].forEach(s => s.setContext(context).draw());
+
+      VF.Formatter.FormatAndDraw(context, stave5, notes5);
+      VF.Formatter.FormatAndDraw(context, stave6, notes6);
+      VF.Formatter.FormatAndDraw(context, stave7, notes7);
+      VF.Formatter.FormatAndDraw(context, stave8, notes8);
+
+      // 下段の連桁(ビーム)
+      VF.Beam.generateBeams(notes5).forEach(b => b.setContext(context).draw());
+      VF.Beam.generateBeams(notes6).forEach(b => b.setContext(context).draw());
+      VF.Beam.generateBeams(notes7).forEach(b => b.setContext(context).draw());
+      VF.Beam.generateBeams(notes8).forEach(b => b.setContext(context).draw());
+    }
 
     // 初期描画
     drawScore();
