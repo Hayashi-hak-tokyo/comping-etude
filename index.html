@@ -47,20 +47,27 @@
       </div>
 
       <!-- モード選択とフレーズ選択 -->
-      <div class="flex flex-col md:flex-row gap-4 border-t pt-4 border-gray-100">
-        <div class="flex-1">
+      <div class="flex flex-col md:flex-row gap-4 border-t pt-4 border-gray-100 items-end">
+        <div class="flex-1 w-full">
           <label class="block text-xs font-bold text-gray-400 uppercase tracking-wider mb-2">Practice Mode</label>
           <select id="mode-select" class="w-full p-2 border border-gray-300 rounded-lg bg-white text-gray-700 font-medium focus:outline-none focus:border-blue-500">
             <option value="fixed">Fixed Pattern (Loop)</option>
-            <option value="random">Random Pattern (Changes every 8 bars)</option>
+            <option value="random">Random Pattern (Auto-change)</option>
           </select>
         </div>
-        <div class="flex-1">
-          <label class="block text-xs font-bold text-gray-400 uppercase tracking-wider mb-2">Select Pattern (Fixed Mode only)</label>
+        <div class="flex-1 w-full">
+          <label class="block text-xs font-bold text-gray-400 uppercase tracking-wider mb-2">Select Pattern</label>
           <select id="pattern-select" class="w-full p-2 border border-gray-300 rounded-lg bg-white text-gray-700 font-medium focus:outline-none focus:border-blue-500">
-            <option value="0">Pattern 1: Syncopation & Bombs</option>
-            <option value="1">Pattern 2: 3-Beat Comping & Triplets</option>
+            <option value="0">1. Syncopation & Bombs</option>
+            <option value="1">2. 3-Beat Comping & Triplets</option>
+            <option value="2">3. Broken Time (Sparse)</option>
+            <option value="3">4. Offbeat Kicks & Snare</option>
           </select>
+        </div>
+        <div class="flex-1 w-full">
+          <button id="regenerate-btn" class="w-full p-2 border-2 border-blue-500 rounded-lg bg-blue-50 text-blue-700 font-bold hover:bg-blue-100 transition-colors shadow-sm">
+            REGENERATE 🎲
+          </button>
         </div>
       </div>
 
@@ -75,9 +82,6 @@
           <span id="status-text" class="text-xs font-bold text-blue-600 uppercase">Ready</span>
         </div>
       </div>
-      <div class="grid grid-cols-8 gap-2" id="bar-tracker">
-        <!-- JSで生成 -->
-      </div>
     </div>
 
     <!-- 楽譜表示エリア -->
@@ -89,85 +93,147 @@
   </div>
 
   <script>
-    // --- フレーズのデータ定義 ---
-    // VF生成ヘルパー内で使うためにデータを文字列で定義
+    // --- フレーズのデータ定義 (Beyond Bop Drumming p.17, 19, 39, 47等に準拠) ---
     const patterns = [
       {
-        name: "Syncopation & Bombs",
+        name: "Page 19 (Elvin's Comping) + Page 47 (3-Beat Fill)",
         scoreNotes: [
-          // Bar 1-4
-          [ {k:["b/4"],d:"qr"}, {k:["b/4"],d:"8r"}, {k:["c/5"],d:"8"}, {k:["b/4"],d:"qr"}, {k:["f/4"],d:"q"} ],
-          [ {k:["b/4"],d:"8r"}, {k:["f/4"],d:"8"}, {k:["b/4"],d:"qr"}, {k:["c/5"],d:"q"}, {k:["b/4"],d:"qr"} ],
-          [ {k:["b/4"],d:"8r"}, {k:["c/5"],d:"8"}, {k:["b/4"],d:"8r"}, {k:["f/4"],d:"8"}, {k:["b/4"],d:"qr"}, {k:["b/4"],d:"8r"}, {k:["c/5"],d:"8"} ],
-          [ {k:["b/4"],d:"hr"}, {k:["b/4"],d:"8r"}, {k:["f/4"],d:"8"}, {k:["c/5"],d:"q"} ],
-          // Bar 5-8
-          [ {k:["b/4"],d:"qr"}, {k:["f/4"],d:"q"}, {k:["c/5"],d:"q"}, {k:["b/4"],d:"8r"}, {k:["f/4"],d:"8"} ],
-          [ {k:["c/5"],d:"q"}, {k:["b/4"],d:"8r"}, {k:["c/5"],d:"8"}, {k:["b/4"],d:"qr"}, {k:["f/4"],d:"q"} ],
-          [ {k:["b/4"],d:"8r"}, {k:["c/5"],d:"8"}, {k:["b/4"],d:"qr"}, {k:["f/4"],d:"q"}, {k:["b/4"],d:"8r"}, {k:["c/5"],d:"8"} ],
-          // Fill: 16ths snare on 1 & 3, kick on 2 & 4
-          [ {k:["c/5"],d:"16"},{k:["c/5"],d:"16"},{k:["c/5"],d:"16"},{k:["c/5"],d:"16"}, {k:["f/4"],d:"q"}, {k:["c/5"],d:"16"},{k:["c/5"],d:"16"},{k:["c/5"],d:"16"},{k:["c/5"],d:"16"}, {k:["f/4"],d:"q"} ]
+          // Bars 1-7: Elvin Jones "All or Nothing At All" (p.19) スタイル。スネアとバスドラムの対話
+          [ {k:["b/4"],d:"8r"}, {k:["c/5"],d:"8"}, {k:["b/4"],d:"8r"}, {k:["f/4"],d:"8"}, {k:["b/4"],d:"qr"}, {k:["c/5"],d:"q"} ],
+          [ {k:["b/4"],d:"qr"}, {k:["f/4"],d:"8"}, {k:["b/4"],d:"8r"}, {k:["b/4"],d:"qr"}, {k:["c/5"],d:"8"}, {k:["b/4"],d:"8r"} ],
+          [ {k:["b/4"],d:"8r"}, {k:["c/5"],d:"8"}, {k:["f/4"],d:"q"}, {k:["b/4"],d:"qr"}, {k:["b/4"],d:"8r"}, {k:["f/4"],d:"8"} ],
+          [ {k:["f/4"],d:"q"}, {k:["b/4"],d:"qr"}, {k:["b/4"],d:"8r"}, {k:["c/5"],d:"8"}, {k:["f/4"],d:"q"} ],
+          [ {k:["b/4"],d:"8r"}, {k:["f/4"],d:"8"}, {k:["c/5"],d:"8"}, {k:["b/4"],d:"8r"}, {k:["b/4"],d:"qr"}, {k:["f/4"],d:"q"} ],
+          [ {k:["c/5"],d:"q"}, {k:["b/4"],d:"8r"}, {k:["f/4"],d:"8"}, {k:["c/5"],d:"q"}, {k:["b/4"],d:"qr"} ],
+          [ {k:["b/4"],d:"8r"}, {k:["f/4"],d:"8"}, {k:["b/4"],d:"8r"}, {k:["c/5"],d:"8"}, {k:["f/4"],d:"q"}, {k:["b/4"],d:"8r"}, {k:["c/5"],d:"8"} ],
+          // Bar 8: 3-Beat Phrases (p.47). 4/4の中で3拍の固まり(付点4分音符相当)を連続させる
+          [ {k:["c/5"],d:"8"}, {k:["c/5"],d:"8"}, {k:["f/4"],d:"8"}, {k:["c/5"],d:"8"}, {k:["c/5"],d:"8"}, {k:["f/4"],d:"8"}, {k:["c/5"],d:"q"} ]
         ],
-        // 描画時のビーム指定 (各小節)
         beams: [
-          [{start:1, end:2}], // Bar 1
-          [{start:0, end:1}], // Bar 2
-          [{start:0, end:1}, {start:2, end:3}, {start:5, end:6}], // Bar 3
-          [{start:1, end:2}], // Bar 4
-          [{start:3, end:4}], // Bar 5
-          [{start:1, end:2}], // Bar 6
-          [{start:0, end:1}, {start:4, end:5}], // Bar 7
-          [{start:0, end:3}, {start:5, end:8}]  // Bar 8 (16分音符の塊ごと)
+          [{start:0, end:1}, {start:2, end:3}], [{start:1, end:2}, {start:4, end:5}], [{start:0, end:1}, {start:4, end:5}], [{start:2, end:3}],
+          [{start:0, end:1}, {start:2, end:3}], [{start:1, end:2}], [{start:0, end:1}, {start:2, end:3}, {start:5, end:6}],
+          [{start:0, end:2}, {start:3, end:5}] // 3連符的なまとまり(3-beat)
         ],
-        // Tone.js 再生用ロジック
         play: (bar, beat, time, upbeat, snare, kick) => {
-          const sixteenth = Tone.Time("4n").toSeconds() / 4;
-          if (bar === 1) { if(beat===1) snare.triggerAttackRelease("16n", time+upbeat, 0.8); if(beat===3) kick.triggerAttackRelease("C1", "8n", time, 1.0); }
-          if (bar === 2) { if(beat===0) kick.triggerAttackRelease("C1", "8n", time+upbeat, 1.0); if(beat===2) snare.triggerAttackRelease("16n", time, 0.8); }
-          if (bar === 3) { if(beat===0) snare.triggerAttackRelease("16n", time+upbeat, 0.8); if(beat===1) kick.triggerAttackRelease("C1", "8n", time+upbeat, 1.0); if(beat===3) snare.triggerAttackRelease("16n", time+upbeat, 0.8); }
-          if (bar === 4) { if(beat===2) kick.triggerAttackRelease("C1", "8n", time+upbeat, 1.0); if(beat===3) snare.triggerAttackRelease("16n", time, 0.8); }
-          if (bar === 5) { if(beat===1) kick.triggerAttackRelease("C1", "8n", time, 1.0); if(beat===2) snare.triggerAttackRelease("16n", time, 0.8); if(beat===3) kick.triggerAttackRelease("C1", "8n", time+upbeat, 1.0); }
-          if (bar === 6) { if(beat===0) snare.triggerAttackRelease("16n", time, 0.8); if(beat===1) snare.triggerAttackRelease("16n", time+upbeat, 0.8); if(beat===3) kick.triggerAttackRelease("C1", "8n", time, 1.0); }
-          if (bar === 7) { if(beat===0) snare.triggerAttackRelease("16n", time+upbeat, 0.8); if(beat===2) kick.triggerAttackRelease("C1", "8n", time, 1.0); if(beat===3) snare.triggerAttackRelease("16n", time+upbeat, 0.8); }
+          if (bar === 1) { if(beat===0) snare.triggerAttackRelease("16n", time+upbeat); if(beat===1) kick.triggerAttackRelease("C1", "8n", time+upbeat); if(beat===3) snare.triggerAttackRelease("16n", time); }
+          if (bar === 2) { if(beat===1) kick.triggerAttackRelease("C1", "8n", time); if(beat===3) snare.triggerAttackRelease("16n", time); }
+          if (bar === 3) { if(beat===0) snare.triggerAttackRelease("16n", time+upbeat); if(beat===1) kick.triggerAttackRelease("C1", "8n", time); if(beat===3) kick.triggerAttackRelease("C1", "8n", time+upbeat); }
+          if (bar === 4) { if(beat===0) kick.triggerAttackRelease("C1", "8n", time); if(beat===2) snare.triggerAttackRelease("16n", time+upbeat); if(beat===3) kick.triggerAttackRelease("C1", "8n", time); }
+          if (bar === 5) { if(beat===0) kick.triggerAttackRelease("C1", "8n", time+upbeat); if(beat===1) snare.triggerAttackRelease("16n", time); if(beat===3) kick.triggerAttackRelease("C1", "8n", time); }
+          if (bar === 6) { if(beat===0) snare.triggerAttackRelease("16n", time); if(beat===1) kick.triggerAttackRelease("C1", "8n", time+upbeat); if(beat===2) snare.triggerAttackRelease("16n", time); }
+          if (bar === 7) { if(beat===0) kick.triggerAttackRelease("C1", "8n", time+upbeat); if(beat===1) snare.triggerAttackRelease("16n", time+upbeat); if(beat===2) kick.triggerAttackRelease("C1", "8n", time); if(beat===3) snare.triggerAttackRelease("16n", time+upbeat); }
           if (bar === 8) {
-            if(beat===0 || beat===2) { snare.triggerAttackRelease("16n", time); snare.triggerAttackRelease("16n", time+sixteenth); snare.triggerAttackRelease("16n", time+sixteenth*2); snare.triggerAttackRelease("16n", time+sixteenth*3); }
-            if(beat===1 || beat===3) { kick.triggerAttackRelease("C1", "8n", time, 1.2); }
+            const eighth = Tone.Time("8n").toSeconds();
+            if(beat===0) { snare.triggerAttackRelease("16n", time); snare.triggerAttackRelease("16n", time+eighth); kick.triggerAttackRelease("C1", "8n", time+eighth*2); }
+            if(beat===1 && beat===2) { snare.triggerAttackRelease("16n", time+eighth); snare.triggerAttackRelease("16n", time+eighth*2); kick.triggerAttackRelease("C1", "8n", time+eighth*3); }
+            if(beat===3) { snare.triggerAttackRelease("16n", time); } // Resolution
           }
         }
       },
       {
-        name: "3-Beat Comping & Triplets",
+        name: "Page 17 (3-Voice in Triplets) + Page 47 (Groups of 4)",
         scoreNotes: [
-          // Bar 1-4: 3-beat cross rhythm idea
-          [ {k:["c/5"],d:"q"}, {k:["b/4"],d:"qr"}, {k:["f/4"],d:"q"}, {k:["b/4"],d:"qr"} ],
-          [ {k:["b/4"],d:"qr"}, {k:["c/5"],d:"q"}, {k:["b/4"],d:"qr"}, {k:["f/4"],d:"q"} ],
-          [ {k:["b/4"],d:"qr"}, {k:["b/4"],d:"qr"}, {k:["c/5"],d:"q"}, {k:["b/4"],d:"qr"} ],
-          [ {k:["f/4"],d:"q"}, {k:["b/4"],d:"qr"}, {k:["c/5"],d:"q"}, {k:["b/4"],d:"qr"} ],
-          // Bar 5-8
-          [ {k:["b/4"],d:"8r"}, {k:["c/5"],d:"8"}, {k:["b/4"],d:"qr"}, {k:["b/4"],d:"8r"}, {k:["f/4"],d:"8"}, {k:["b/4"],d:"qr"} ],
-          [ {k:["c/5"],d:"q"}, {k:["f/4"],d:"q"}, {k:["b/4"],d:"hr"} ],
-          [ {k:["b/4"],d:"qr"}, {k:["b/4"],d:"8r"}, {k:["c/5"],d:"8"}, {k:["b/4"],d:"qr"}, {k:["f/4"],d:"q"} ],
-          // Fill: Snare and Kick alternating 8th notes (straight)
-          [ {k:["c/5"],d:"8"}, {k:["f/4"],d:"8"}, {k:["c/5"],d:"8"}, {k:["f/4"],d:"8"}, {k:["c/5"],d:"8"}, {k:["f/4"],d:"8"}, {k:["c/5"],d:"8"}, {k:["f/4"],d:"8"} ]
+          // Bars 1-7: Page 17 - 3-Voice Comping in Triplets (Snare & Kick)
+          [ {k:["c/5"],d:"8"}, {k:["b/4"],d:"8r"}, {k:["f/4"],d:"q"}, {k:["b/4"],d:"qr"}, {k:["c/5"],d:"q"} ],
+          [ {k:["b/4"],d:"qr"}, {k:["b/4"],d:"8r"}, {k:["f/4"],d:"8"}, {k:["c/5"],d:"8"}, {k:["b/4"],d:"8r"}, {k:["f/4"],d:"q"} ],
+          [ {k:["f/4"],d:"q"}, {k:["c/5"],d:"q"}, {k:["b/4"],d:"hr"} ],
+          [ {k:["b/4"],d:"8r"}, {k:["c/5"],d:"8"}, {k:["b/4"],d:"8r"}, {k:["f/4"],d:"8"}, {k:["b/4"],d:"qr"}, {k:["c/5"],d:"q"} ],
+          [ {k:["b/4"],d:"qr"}, {k:["c/5"],d:"q"}, {k:["f/4"],d:"q"}, {k:["b/4"],d:"qr"} ],
+          [ {k:["b/4"],d:"8r"}, {k:["f/4"],d:"8"}, {k:["c/5"],d:"q"}, {k:["b/4"],d:"qr"}, {k:["f/4"],d:"q"} ],
+          [ {k:["c/5"],d:"8"}, {k:["b/4"],d:"8r"}, {k:["b/4"],d:"qr"}, {k:["b/4"],d:"8r"}, {k:["f/4"],d:"8"}, {k:["c/5"],d:"q"} ],
+          // Bar 8: Triplets in Groups of 4 (p.47). 16分音符の4つ割り
+          [ {k:["c/5"],d:"16"},{k:["c/5"],d:"16"},{k:["f/4"],d:"16"},{k:["f/4"],d:"16"}, {k:["c/5"],d:"16"},{k:["c/5"],d:"16"},{k:["f/4"],d:"16"},{k:["f/4"],d:"16"}, {k:["c/5"],d:"q"}, {k:["f/4"],d:"q"} ]
         ],
         beams: [
-          [], [], [], [],
-          [{start:0, end:1}, {start:3, end:4}], // Bar 5
-          [], // Bar 6
-          [{start:1, end:2}], // Bar 7
-          [{start:0, end:1}, {start:2, end:3}, {start:4, end:5}, {start:6, end:7}] // Bar 8
+          [{start:0, end:1}], [{start:1, end:2}, {start:3, end:4}], [], [{start:0, end:1}, {start:2, end:3}], [], [{start:0, end:1}], [{start:0, end:1}, {start:3, end:4}],
+          [{start:0, end:3}, {start:4, end:7}] // 4つ割り16分
         ],
         play: (bar, beat, time, upbeat, snare, kick) => {
-          const eighth = Tone.Time("8n").toSeconds();
-          if (bar === 1) { if(beat===0) snare.triggerAttackRelease("16n", time); if(beat===2) kick.triggerAttackRelease("C1", "8n", time); }
-          if (bar === 2) { if(beat===1) snare.triggerAttackRelease("16n", time); if(beat===3) kick.triggerAttackRelease("C1", "8n", time); }
-          if (bar === 3) { if(beat===2) snare.triggerAttackRelease("16n", time); }
-          if (bar === 4) { if(beat===0) kick.triggerAttackRelease("C1", "8n", time); if(beat===2) snare.triggerAttackRelease("16n", time); }
-          if (bar === 5) { if(beat===0) snare.triggerAttackRelease("16n", time+upbeat); if(beat===2) kick.triggerAttackRelease("C1", "8n", time+upbeat); }
-          if (bar === 6) { if(beat===0) snare.triggerAttackRelease("16n", time); if(beat===1) kick.triggerAttackRelease("C1", "8n", time); }
-          if (bar === 7) { if(beat===1) snare.triggerAttackRelease("16n", time+upbeat); if(beat===3) kick.triggerAttackRelease("C1", "8n", time); }
+          if (bar === 1) { if(beat===0) snare.triggerAttackRelease("16n", time); if(beat===1) kick.triggerAttackRelease("C1", "8n", time); if(beat===3) snare.triggerAttackRelease("16n", time); }
+          if (bar === 2) { if(beat===1) kick.triggerAttackRelease("C1", "8n", time+upbeat); if(beat===2) snare.triggerAttackRelease("16n", time); if(beat===3) kick.triggerAttackRelease("C1", "8n", time); }
+          if (bar === 3) { if(beat===0) kick.triggerAttackRelease("C1", "8n", time); if(beat===1) snare.triggerAttackRelease("16n", time); }
+          if (bar === 4) { if(beat===0) snare.triggerAttackRelease("16n", time+upbeat); if(beat===1) kick.triggerAttackRelease("C1", "8n", time+upbeat); if(beat===3) snare.triggerAttackRelease("16n", time); }
+          if (bar === 5) { if(beat===1) snare.triggerAttackRelease("16n", time); if(beat===2) kick.triggerAttackRelease("C1", "8n", time); }
+          if (bar === 6) { if(beat===0) kick.triggerAttackRelease("C1", "8n", time+upbeat); if(beat===1) snare.triggerAttackRelease("16n", time); if(beat===3) kick.triggerAttackRelease("C1", "8n", time); }
+          if (bar === 7) { if(beat===0) snare.triggerAttackRelease("16n", time); if(beat===2) kick.triggerAttackRelease("C1", "8n", time+upbeat); if(beat===3) snare.triggerAttackRelease("16n", time); }
           if (bar === 8) {
-            snare.triggerAttackRelease("16n", time);
-            kick.triggerAttackRelease("C1", "8n", time+eighth);
+            const sixteenth = Tone.Time("4n").toSeconds() / 4;
+            if(beat===0 || beat===1) {
+              snare.triggerAttackRelease("16n", time); snare.triggerAttackRelease("16n", time+sixteenth);
+              kick.triggerAttackRelease("C1", "8n", time+sixteenth*2); kick.triggerAttackRelease("C1", "8n", time+sixteenth*3);
+            }
+            if(beat===2) snare.triggerAttackRelease("16n", time);
+            if(beat===3) kick.triggerAttackRelease("C1", "8n", time);
+          }
+        }
+      },
+      {
+        name: "Page 10 (8th-note Comping) + Page 39 (Odd Groups)",
+        scoreNotes: [
+          // Bars 1-7: Basic 8th-note syncopation
+          [ {k:["b/4"],d:"qr"}, {k:["f/4"],d:"8"}, {k:["c/5"],d:"8"}, {k:["b/4"],d:"qr"}, {k:["f/4"],d:"q"} ],
+          [ {k:["c/5"],d:"q"}, {k:["b/4"],d:"8r"}, {k:["f/4"],d:"8"}, {k:["c/5"],d:"q"}, {k:["b/4"],d:"qr"} ],
+          [ {k:["b/4"],d:"8r"}, {k:["c/5"],d:"8"}, {k:["b/4"],d:"qr"}, {k:["f/4"],d:"q"}, {k:["b/4"],d:"qr"} ],
+          [ {k:["b/4"],d:"qr"}, {k:["c/5"],d:"8"}, {k:["f/4"],d:"8"}, {k:["b/4"],d:"hr"} ],
+          [ {k:["b/4"],d:"8r"}, {k:["f/4"],d:"8"}, {k:["c/5"],d:"q"}, {k:["b/4"],d:"qr"}, {k:["f/4"],d:"q"} ],
+          [ {k:["b/4"],d:"qr"}, {k:["c/5"],d:"q"}, {k:["f/4"],d:"8"}, {k:["c/5"],d:"8"}, {k:["b/4"],d:"qr"} ],
+          [ {k:["f/4"],d:"q"}, {k:["b/4"],d:"qr"}, {k:["c/5"],d:"q"}, {k:["f/4"],d:"q"} ],
+          // Bar 8: Odd Groups (p.39) 5連符的なニュアンス
+          [ {k:["c/5"],d:"16"},{k:["c/5"],d:"16"},{k:["c/5"],d:"16"},{k:["f/4"],d:"16"},{k:["f/4"],d:"16"}, {k:["b/4"],d:"16r"},{k:["b/4"],d:"16r"},{k:["b/4"],d:"16r"}, {k:["c/5"],d:"q"}, {k:["f/4"],d:"q"} ]
+        ],
+        beams: [
+          [{start:1, end:2}], [{start:1, end:2}], [{start:0, end:1}], [{start:1, end:2}], [{start:0, end:1}], [{start:2, end:3}], [],
+          [{start:0, end:4}]
+        ],
+        play: (bar, beat, time, upbeat, snare, kick) => {
+          if (bar === 1) { if(beat===1) { kick.triggerAttackRelease("C1", "8n", time); snare.triggerAttackRelease("16n", time+upbeat); } if(beat===3) kick.triggerAttackRelease("C1", "8n", time); }
+          if (bar === 2) { if(beat===0) snare.triggerAttackRelease("16n", time); if(beat===1) kick.triggerAttackRelease("C1", "8n", time+upbeat); if(beat===2) snare.triggerAttackRelease("16n", time); }
+          if (bar === 3) { if(beat===0) snare.triggerAttackRelease("16n", time+upbeat); if(beat===2) kick.triggerAttackRelease("C1", "8n", time); }
+          if (bar === 4) { if(beat===1) { snare.triggerAttackRelease("16n", time); kick.triggerAttackRelease("C1", "8n", time+upbeat); } }
+          if (bar === 5) { if(beat===0) kick.triggerAttackRelease("C1", "8n", time+upbeat); if(beat===1) snare.triggerAttackRelease("16n", time); if(beat===3) kick.triggerAttackRelease("C1", "8n", time); }
+          if (bar === 6) { if(beat===1) snare.triggerAttackRelease("16n", time); if(beat===2) { kick.triggerAttackRelease("C1", "8n", time); snare.triggerAttackRelease("16n", time+upbeat); } }
+          if (bar === 7) { if(beat===0) kick.triggerAttackRelease("C1", "8n", time); if(beat===2) snare.triggerAttackRelease("16n", time); if(beat===3) kick.triggerAttackRelease("C1", "8n", time); }
+          if (bar === 8) {
+            const sixteenth = Tone.Time("4n").toSeconds() / 4;
+            if(beat===0) { snare.triggerAttackRelease("16n", time); snare.triggerAttackRelease("16n", time+sixteenth); snare.triggerAttackRelease("16n", time+sixteenth*2); kick.triggerAttackRelease("C1", "8n", time+sixteenth*3); }
+            if(beat===1) { kick.triggerAttackRelease("C1", "8n", time); }
+            if(beat===2) { snare.triggerAttackRelease("16n", time); }
+            if(beat===3) { kick.triggerAttackRelease("C1", "8n", time); }
+          }
+        }
+      },
+      {
+        name: "Page 13 (DeJohnette) + Page 46 (Variable Speed)",
+        scoreNotes: [
+          // Bars 1-7: Unbroken flow, sparse comping
+          [ {k:["b/4"],d:"qr"}, {k:["b/4"],d:"qr"}, {k:["c/5"],d:"8"}, {k:["b/4"],d:"8r"}, {k:["f/4"],d:"q"} ],
+          [ {k:["b/4"],d:"8r"}, {k:["c/5"],d:"8"}, {k:["f/4"],d:"q"}, {k:["b/4"],d:"hr"} ],
+          [ {k:["b/4"],d:"hr"}, {k:["f/4"],d:"q"}, {k:["c/5"],d:"8"}, {k:["b/4"],d:"8r"} ],
+          [ {k:["b/4"],d:"8r"}, {k:["c/5"],d:"8"}, {k:["b/4"],d:"8r"}, {k:["f/4"],d:"8"}, {k:["c/5"],d:"q"}, {k:["b/4"],d:"qr"} ],
+          [ {k:["f/4"],d:"8"}, {k:["b/4"],d:"8r"}, {k:["b/4"],d:"qr"}, {k:["c/5"],d:"8"}, {k:["b/4"],d:"8r"}, {k:["f/4"],d:"q"} ],
+          [ {k:["b/4"],d:"qr"}, {k:["f/4"],d:"q"}, {k:["b/4"],d:"8r"}, {k:["c/5"],d:"8"}, {k:["b/4"],d:"qr"} ],
+          [ {k:["c/5"],d:"q"}, {k:["b/4"],d:"qr"}, {k:["f/4"],d:"q"}, {k:["c/5"],d:"q"} ],
+          // Bar 8: Variable Speed Phrase (p.46)
+          [ {k:["c/5"],d:"8"}, {k:["f/4"],d:"8"}, {k:["c/5"],d:"16"},{k:["c/5"],d:"16"},{k:["f/4"],d:"16"},{k:["f/4"],d:"16"}, {k:["c/5"],d:"8"}, {k:["f/4"],d:"8"}, {k:["c/5"],d:"q"} ]
+        ],
+        beams: [
+          [{start:2, end:3}], [{start:0, end:1}], [{start:2, end:3}], [{start:0, end:1}, {start:2, end:3}], [{start:0, end:1}, {start:3, end:4}], [{start:2, end:3}], [],
+          [{start:0, end:1}, {start:2, end:5}, {start:6, end:7}]
+        ],
+        play: (bar, beat, time, upbeat, snare, kick) => {
+          if (bar === 1) { if(beat===2) snare.triggerAttackRelease("16n", time); if(beat===3) kick.triggerAttackRelease("C1", "8n", time); }
+          if (bar === 2) { if(beat===0) snare.triggerAttackRelease("16n", time+upbeat); if(beat===1) kick.triggerAttackRelease("C1", "8n", time); }
+          if (bar === 3) { if(beat===2) kick.triggerAttackRelease("C1", "8n", time); if(beat===3) snare.triggerAttackRelease("16n", time); }
+          if (bar === 4) { if(beat===0) snare.triggerAttackRelease("16n", time+upbeat); if(beat===1) kick.triggerAttackRelease("C1", "8n", time+upbeat); if(beat===2) snare.triggerAttackRelease("16n", time); }
+          if (bar === 5) { if(beat===0) kick.triggerAttackRelease("C1", "8n", time); if(beat===2) snare.triggerAttackRelease("16n", time); if(beat===3) kick.triggerAttackRelease("C1", "8n", time); }
+          if (bar === 6) { if(beat===1) kick.triggerAttackRelease("C1", "8n", time); if(beat===2) snare.triggerAttackRelease("16n", time+upbeat); }
+          if (bar === 7) { if(beat===0) snare.triggerAttackRelease("16n", time); if(beat===2) kick.triggerAttackRelease("C1", "8n", time); if(beat===3) snare.triggerAttackRelease("16n", time); }
+          if (bar === 8) {
+            const sixteenth = Tone.Time("4n").toSeconds() / 4;
+            if(beat===0) { snare.triggerAttackRelease("16n", time); kick.triggerAttackRelease("C1", "8n", time+sixteenth*2); }
+            if(beat===1) { snare.triggerAttackRelease("16n", time); snare.triggerAttackRelease("16n", time+sixteenth); kick.triggerAttackRelease("C1", "8n", time+sixteenth*2); kick.triggerAttackRelease("C1", "8n", time+sixteenth*3); }
+            if(beat===2) { snare.triggerAttackRelease("16n", time); kick.triggerAttackRelease("C1", "8n", time+sixteenth*2); }
+            if(beat===3) { snare.triggerAttackRelease("16n", time); }
           }
         }
       }
@@ -183,32 +249,27 @@
     const playBtn = document.getElementById('play-btn');
     const bpmSlider = document.getElementById('bpm-slider');
     const bpmDisplay = document.getElementById('bpm-display');
-    const barTracker = document.getElementById('bar-tracker');
     const statusText = document.getElementById('status-text');
     const beatDisplay = document.getElementById('beat-display');
     const modeSelect = document.getElementById('mode-select');
     const patternSelect = document.getElementById('pattern-select');
-
-    // トラッカー生成
-    const bars = [];
-    for(let i = 1; i <= 8; i++) {
-      const div = document.createElement('div');
-      div.className = 'h-12 flex items-center justify-center rounded-lg border-2 border-gray-200 text-gray-400 font-bold text-lg bg-gray-50 transition-all duration-75';
-      div.textContent = i;
-      barTracker.appendChild(div);
-      bars.push(div);
-    }
+    const regenerateBtn = document.getElementById('regenerate-btn');
 
     // イベントリスナー
     modeSelect.addEventListener('change', (e) => {
       isRandomMode = e.target.value === 'random';
       patternSelect.disabled = isRandomMode;
-      if(!isPlaying) drawScore(); // 再生中でなければ即座に書き換え
     });
     
     patternSelect.addEventListener('change', (e) => {
       currentPatternIndex = parseInt(e.target.value, 10);
       if(!isPlaying) drawScore();
+    });
+
+    regenerateBtn.addEventListener('click', () => {
+      currentPatternIndex = Math.floor(Math.random() * patterns.length);
+      patternSelect.value = currentPatternIndex;
+      drawScore();
     });
 
     bpmSlider.addEventListener('input', (e) => {
@@ -235,7 +296,6 @@
         isPlaying = false;
         playBtn.textContent = "START CLICK";
         playBtn.className = "w-full md:w-48 py-4 rounded-xl font-bold text-lg text-white bg-blue-600 hover:bg-blue-700 transition-all shadow-md";
-        bars.forEach(b => { b.classList.remove('active-bar', 'fill-bar'); b.classList.add('border-gray-200', 'text-gray-400', 'bg-gray-50'); });
         statusText.textContent = "Ready";
         beatDisplay.textContent = "1-1";
       } else {
@@ -246,9 +306,9 @@
         let barCount = 1;
         let beatCount = 0;
 
-        // ランダムモードなら開始時にランダム選択
         if(isRandomMode) {
           currentPatternIndex = Math.floor(Math.random() * patterns.length);
+          patternSelect.value = currentPatternIndex;
           Tone.Draw.schedule(() => drawScore(), Tone.now());
         }
 
@@ -268,16 +328,10 @@
             beatDisplay.textContent = `${barCount}-${beatCount + 1}`;
 
             if (beatCount === 0) {
-              bars.forEach(b => { b.classList.remove('active-bar', 'fill-bar'); b.classList.add('border-gray-200', 'text-gray-400', 'bg-gray-50'); });
-              const activeDiv = bars[barCount - 1];
-              activeDiv.classList.remove('border-gray-200', 'text-gray-400', 'bg-gray-50');
-              
               if (barCount === 8) {
-                activeDiv.classList.add('fill-bar');
                 statusText.textContent = "Bar 8: Fill-in";
                 statusText.className = "text-xs font-bold text-red-500 uppercase tracking-wider";
               } else {
-                activeDiv.classList.add('active-bar');
                 statusText.textContent = `Bar ${barCount}: Comping`;
                 statusText.className = "text-xs font-bold text-blue-600 uppercase tracking-wider";
               }
@@ -293,6 +347,7 @@
               // ランダムモードの場合はパターン変更
               if(isRandomMode) {
                 currentPatternIndex = Math.floor(Math.random() * patterns.length);
+                patternSelect.value = currentPatternIndex;
                 Tone.Draw.schedule(() => drawScore(), time + quarter); // 次の小節の頭で描画
               }
             }
