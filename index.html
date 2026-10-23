@@ -1,0 +1,259 @@
+import React, { useState, useEffect, useRef } from "react";
+import * as Tone from "tone";
+import { Play, Square, Activity } from "lucide-react";
+
+export default function App() {
+  const [isPlaying, setIsPlaying] = useState(false);
+  const [bpm, setBpm] = useState(160);
+  const [currentBar, setCurrentBar] = useState(1);
+  const [currentBeat, setCurrentBeat] = useState(0);
+
+  const synths = useRef({});
+  const transportId = useRef(null);
+
+  useEffect(() => {
+    // Tone.js Instruments Setup
+    synths.current = {
+      kick: new Tone.MembraneSynth().toDestination(),
+      snare: new Tone.NoiseSynth({
+        noise: { type: "white" },
+        envelope: { attack: 0.001, decay: 0.2, sustain: 0 },
+        volume: -5,
+      }).toDestination(),
+      ride: new Tone.MetalSynth({
+        frequency: 250,
+        envelope: { attack: 0.001, decay: 1.4, release: 0.2 },
+        harmonicity: 5.1,
+        modulationIndex: 32,
+        resonance: 4000,
+        octaves: 1.5,
+        volume: -8,
+      }).toDestination(),
+      hihat: new Tone.MetalSynth({
+        frequency: 400,
+        envelope: { attack: 0.001, decay: 0.1, release: 0.01 },
+        harmonicity: 5.1,
+        modulationIndex: 32,
+        resonance: 4000,
+        octaves: 1.5,
+        volume: -10,
+      }).toDestination()
+    };
+
+    return () => {
+      Object.values(synths.current).forEach(synth => synth.dispose());
+      Tone.Transport.stop();
+      Tone.Transport.cancel();
+    };
+  }, []);
+
+  const togglePlayback = async () => {
+    if (isPlaying) {
+      Tone.Transport.stop();
+      if (transportId.current !== null) {
+        Tone.Transport.clear(transportId.current);
+      }
+      setIsPlaying(false);
+      setCurrentBar(1);
+      setCurrentBeat(0);
+    } else {
+      await Tone.start();
+      Tone.Transport.bpm.value = bpm;
+      Tone.Transport.swing = 0.6; // ジャズのスイングフィール
+      Tone.Transport.swingSubdivision = "8n";
+
+      let barCount = 1;
+      let beatCount = 0; // 0 to 3
+
+      transportId.current = Tone.Transport.scheduleRepeat((time) => {
+        const { kick, snare, ride, hihat } = synths.current;
+        if (!kick || !snare || !ride || !hihat) return;
+
+        // UI Update
+        Tone.Draw.schedule(() => {
+          setCurrentBar(barCount);
+          setCurrentBeat(beatCount);
+        }, time);
+
+        // --- 音楽的ロジック ---
+        if (barCount <= 7) {
+          // 【Bars 1-7】 Comping
+          // ライドシンバル (1, 2, 3, 4拍目)
+          ride.triggerAttackRelease("4n", time, 0.7);
+          // ライドのスキップノート (2拍裏、4拍裏)
+          if (beatCount === 1 || beatCount === 3) {
+            ride.triggerAttackRelease("8n", time + Tone.Time("8n").toSeconds(), 0.4);
+          }
+          
+          // ハイハット (2, 4拍目)
+          if (beatCount === 1 || beatCount === 3) {
+            hihat.triggerAttackRelease("8n", time, 0.8);
+          }
+
+          // フェザリング (4分音符で軽く踏むバスドラム)
+          kick.triggerAttackRelease("C1", "8n", time, 0.1);
+
+          // コンピングのバリエーション
+          if (barCount % 2 === 0 && beatCount === 2) {
+            snare.triggerAttackRelease("8n", time + Tone.Time("8n").toSeconds(), 0.6); // 3拍裏
+          }
+          if (barCount % 4 === 0 && beatCount === 3) {
+            kick.triggerAttackRelease("C1", "8n", time, 0.7); // 4拍目アクセント
+          }
+
+        } else {
+          // 【Bar 8】 Bebop Fill (Dropping Bombs)
+          if (beatCount === 0) {
+            snare.triggerAttackRelease("16n", time, 0.9);
+            ride.triggerAttackRelease("4n", time, 0.8);
+          }
+          if (beatCount === 1) {
+            kick.triggerAttackRelease("C1", "8n", time, 1); // Bomb!
+            hihat.triggerAttackRelease("8n", time, 0.7);
+          }
+          if (beatCount === 2) {
+            snare.triggerAttackRelease("16n", time, 0.7);
+            snare.triggerAttackRelease("16n", time + Tone.Time("8n").toSeconds(), 0.8);
+          }
+          if (beatCount === 3) {
+            kick.triggerAttackRelease("C1", "8n", time, 0.9); // Bomb!
+            ride.triggerAttackRelease("4n", time, 0.8);
+          }
+        }
+
+        // カウンターの更新
+        beatCount++;
+        if (beatCount > 3) {
+          beatCount = 0;
+          barCount++;
+          if (barCount > 8) {
+            barCount = 1;
+          }
+        }
+      }, "4n");
+
+      Tone.Transport.start();
+      setIsPlaying(true);
+    }
+  };
+
+  const handleBpmChange = (e) => {
+    const newBpm = Number(e.target.value);
+    setBpm(newBpm);
+    if (Tone.Transport.state === "started") {
+      Tone.Transport.bpm.rampTo(newBpm, 0.1);
+    }
+  };
+
+  return (
+    <div className="min-h-screen bg-[#0a0a0a] text-gray-100 font-sans flex items-center justify-center p-4">
+      <div className="max-w-xl w-full space-y-8">
+        
+        {/* Header */}
+        <div className="text-center space-y-2">
+          <div className="inline-flex items-center justify-center p-3 bg-blue-500/10 rounded-full mb-4">
+            <Activity className="w-6 h-6 text-blue-400" />
+          </div>
+          <h1 className="text-3xl font-bold tracking-tight">Beyond Bop Practice</h1>
+          <p className="text-gray-400 text-sm">7-Bar Comping & 1-Bar Bebop Fill</p>
+        </div>
+
+        {/* Main Display */}
+        <div className="bg-[#111111] border border-gray-800 rounded-2xl p-8 shadow-2xl relative overflow-hidden">
+          
+          {/* Status Badge */}
+          <div className="absolute top-6 left-6">
+            <span className={`px-3 py-1 text-xs font-bold uppercase tracking-wider rounded-full ${
+              currentBar === 8 
+                ? 'bg-orange-500/20 text-orange-400 border border-orange-500/30' 
+                : 'bg-blue-500/20 text-blue-400 border border-blue-500/30'
+            }`}>
+              {currentBar === 8 ? 'Fill-in (Dropping Bombs)' : 'Comping'}
+            </span>
+          </div>
+
+          {/* Bar Counter */}
+          <div className="flex flex-col items-center justify-center mt-12 mb-8">
+            <div className="flex items-baseline gap-2">
+              <span className={`text-8xl font-black tabular-nums transition-colors duration-200 ${
+                currentBar === 8 ? 'text-orange-400' : 'text-gray-100'
+              }`}>
+                {currentBar}
+              </span>
+              <span className="text-3xl font-bold text-gray-600">/ 8</span>
+            </div>
+            
+            {/* Beat Indicators */}
+            <div className="flex gap-3 mt-6">
+              {[0, 1, 2, 3].map((beat) => (
+                <div 
+                  key={beat}
+                  className={`w-3 h-3 rounded-full transition-all duration-100 ${
+                    currentBeat === beat && isPlaying
+                      ? (currentBar === 8 ? 'bg-orange-400 shadow-[0_0_10px_rgba(251,146,60,0.6)]' : 'bg-blue-400 shadow-[0_0_10px_rgba(96,165,250,0.6)]')
+                      : 'bg-gray-800'
+                  }`}
+                />
+              ))}
+            </div>
+          </div>
+
+          {/* 8-Bar Grid Visualizer */}
+          <div className="grid grid-cols-8 gap-2 mt-8">
+            {[1, 2, 3, 4, 5, 6, 7, 8].map((bar) => (
+              <div 
+                key={bar}
+                className={`h-2 rounded-full transition-all duration-300 ${
+                  currentBar === bar && isPlaying
+                    ? (bar === 8 ? 'bg-orange-400' : 'bg-blue-400')
+                    : (bar === 8 ? 'bg-gray-800' : 'bg-gray-800')
+                }`}
+              />
+            ))}
+          </div>
+        </div>
+
+        {/* Controls */}
+        <div className="bg-[#111111] border border-gray-800 rounded-2xl p-6 space-y-6">
+          <div className="space-y-4">
+            <div className="flex justify-between items-end">
+              <label className="text-sm font-semibold text-gray-400">Tempo</label>
+              <div className="text-2xl font-bold tabular-nums">
+                {bpm} <span className="text-sm text-gray-500 font-normal">BPM</span>
+              </div>
+            </div>
+            <input
+              type="range"
+              min="80"
+              max="280"
+              step="1"
+              value={bpm}
+              onChange={handleBpmChange}
+              className="w-full h-2 bg-gray-800 rounded-full appearance-none cursor-pointer accent-blue-500"
+            />
+          </div>
+
+          <button
+            onClick={togglePlayback}
+            className={`w-full py-4 rounded-xl font-bold text-lg flex items-center justify-center gap-2 transition-all duration-200 active:scale-[0.98] ${
+              isPlaying
+                ? "bg-red-500/10 text-red-500 border border-red-500/50 hover:bg-red-500/20"
+                : "bg-blue-500 text-white hover:bg-blue-600 hover:shadow-lg hover:shadow-blue-500/25"
+            }`}
+          >
+            {isPlaying ? (
+              <>
+                <Square className="w-5 h-5 fill-current" /> Stop
+              </>
+            ) : (
+              <>
+                <Play className="w-6 h-6 fill-current" /> Start Practice
+              </>
+            )}
+          </button>
+        </div>
+
+      </div>
+    </div>
+  );
+}
