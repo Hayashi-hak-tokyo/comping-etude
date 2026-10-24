@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Bop Drumming Etude - John Riley Concept</title>
+  <title>Jazz style Drumming Etude</title>
   <script src="https://cdn.tailwindcss.com"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/tone/14.8.49/Tone.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/vexflow/3.0.9/vexflow-min.js"></script>
@@ -23,8 +23,7 @@
     
     <!-- ヘッダー -->
     <div class="text-center border-b-2 border-gray-200 pb-6 mb-8">
-      <h1 class="text-4xl font-bold tracking-tight text-gray-900" style="font-family: 'Times New Roman', Times, serif;">Bop Drumming Etude</h1>
-      <p class="text-gray-500 mt-2 font-medium">John Riley: The Art of Bop Drumming &amp; Beyond Bop</p>
+      <h1 class="text-4xl font-bold tracking-tight text-gray-900" style="font-family: 'Times New Roman', Times, serif;">Jazz style Drumming Etude</h1>
     </div>
 
     <!-- コントロールパネル -->
@@ -44,17 +43,27 @@
         </button>
       </div>
 
-      <!-- モード選択と再生成 -->
-      <div class="flex flex-col sm:flex-row gap-4 border-t pt-4 border-gray-100 items-center justify-between">
-        <div class="w-full sm:w-1/2">
+      <!-- 設定エリア -->
+      <div class="grid grid-cols-1 sm:grid-cols-3 gap-4 border-t pt-4 border-gray-100 items-end">
+        <div>
           <label class="block text-xs font-bold text-gray-400 uppercase tracking-wider mb-2">Practice Mode</label>
           <select id="mode-select" class="w-full p-2.5 border border-gray-300 rounded-lg bg-white text-gray-800 font-medium focus:outline-none focus:border-blue-500">
-            <option value="fixed">Fixed Pattern (Same Comping for 7 Bars + Fill)</option>
-            <option value="random">Random Pattern (Randomized Comping for 7 Bars + Fill)</option>
+            <option value="fixed">Fixed Pattern</option>
+            <option value="random" selected>Random Pattern</option>
           </select>
         </div>
-        <div class="w-full sm:w-1/3">
-          <label class="block text-xs font-bold text-transparent uppercase tracking-wider mb-2 hidden sm:block">Action</label>
+
+        <div>
+          <label class="block text-xs font-bold text-gray-400 uppercase tracking-wider mb-2">Fill-in Length</label>
+          <select id="fill-len-select" class="w-full p-2.5 border border-gray-300 rounded-lg bg-white text-gray-800 font-medium focus:outline-none focus:border-blue-500">
+            <option value="2beats">2 Beats (Bar 8, Beats 3-4)</option>
+            <option value="1bar" selected>1 Bar (Bar 8)</option>
+            <option value="1bar2beats">1 Bar + 2 Beats (Bar 7 Beat 3 ~ Bar 8)</option>
+            <option value="2bars">2 Bars (Bars 7 &amp; 8)</option>
+          </select>
+        </div>
+
+        <div>
           <button id="regenerate-btn" class="w-full py-2.5 px-4 border-2 border-blue-500 rounded-lg bg-blue-50 text-blue-700 font-bold hover:bg-blue-100 transition-colors shadow-sm">
             REGENERATE 🎲
           </button>
@@ -84,141 +93,117 @@
 
   <script>
     // =========================================================================
-    // ジョン・ライリーのコンピング・ボキャブラリー集 (The Art of Bop Drumming & Beyond Bop)
+    // ジョン・ライリー コンピング・ボキャブラリー (50パターン以上を網羅)
+    // The Art of Bop Drumming & Beyond Bop Drumming
     // =========================================================================
     const compingVocab = [
-      // 1. Snare Beat 4 Offbeat (基本の4拍裏)
-      {
-        notes: [ {k:["b/4"],d:"qr"}, {k:["b/4"],d:"qr"}, {k:["b/4"],d:"qr"}, {k:["b/4"],d:"8r"}, {k:["c/5"],d:"8"} ],
-        events: [{beat:3, sub:1, inst:"snare"}]
-      },
-      // 2. Snare Beat 2 Offbeat (2拍裏)
-      {
-        notes: [ {k:["b/4"],d:"qr"}, {k:["b/4"],d:"8r"}, {k:["c/5"],d:"8"}, {k:["b/4"],d:"qr"}, {k:["b/4"],d:"qr"} ],
-        events: [{beat:1, sub:1, inst:"snare"}]
-      },
-      // 3. Snare Beat 1 Offbeat & Beat 3 Offbeat
-      {
-        notes: [ {k:["b/4"],d:"8r"}, {k:["c/5"],d:"8"}, {k:["b/4"],d:"qr"}, {k:["b/4"],d:"8r"}, {k:["c/5"],d:"8"}, {k:["b/4"],d:"qr"} ],
-        events: [{beat:0, sub:1, inst:"snare"}, {beat:2, sub:1, inst:"snare"}]
-      },
-      // 4. Snare Beat 2 & 4 Backbeat Comping
-      {
-        notes: [ {k:["b/4"],d:"qr"}, {k:["c/5"],d:"q"}, {k:["b/4"],d:"qr"}, {k:["c/5"],d:"q"} ],
-        events: [{beat:1, sub:0, inst:"snare"}, {beat:3, sub:0, inst:"snare"}]
-      },
-      // 5. Kick Beat 4 Offbeat
-      {
-        notes: [ {k:["b/4"],d:"qr"}, {k:["b/4"],d:"qr"}, {k:["b/4"],d:"qr"}, {k:["b/4"],d:"8r"}, {k:["f/4"],d:"8"} ],
-        events: [{beat:3, sub:1, inst:"kick"}]
-      },
-      // 6. Kick Beat 1 & 3 Downbeats
-      {
-        notes: [ {k:["f/4"],d:"q"}, {k:["b/4"],d:"qr"}, {k:["f/4"],d:"q"}, {k:["b/4"],d:"qr"} ],
-        events: [{beat:0, sub:0, inst:"kick"}, {beat:2, sub:0, inst:"kick"}]
-      },
-      // 7. Kick Beat 2 Offbeat & Beat 4 Downbeat
-      {
-        notes: [ {k:["b/4"],d:"qr"}, {k:["b/4"],d:"8r"}, {k:["f/4"],d:"8"}, {k:["b/4"],d:"qr"}, {k:["f/4"],d:"q"} ],
-        events: [{beat:1, sub:1, inst:"kick"}, {beat:3, sub:0, inst:"kick"}]
-      },
-      // 8. Two-Voice: Snare Beat 1 Offbeat + Kick Beat 3 Offbeat
-      {
-        notes: [ {k:["b/4"],d:"8r"}, {k:["c/5"],d:"8"}, {k:["b/4"],d:"qr"}, {k:["b/4"],d:"8r"}, {k:["f/4"],d:"8"}, {k:["b/4"],d:"qr"} ],
-        events: [{beat:0, sub:1, inst:"snare"}, {beat:2, sub:1, inst:"kick"}]
-      },
-      // 9. Two-Voice: Snare Beat 2 Offbeat + Kick Beat 4 Offbeat
-      {
-        notes: [ {k:["b/4"],d:"qr"}, {k:["b/4"],d:"8r"}, {k:["c/5"],d:"8"}, {k:["b/4"],d:"qr"}, {k:["b/4"],d:"8r"}, {k:["f/4"],d:"8"} ],
-        events: [{beat:1, sub:1, inst:"snare"}, {beat:3, sub:1, inst:"kick"}]
-      },
-      // 10. Call & Response: Kick Beat 1 Down -> Snare Beat 2 Off -> Kick Beat 4
-      {
-        notes: [ {k:["f/4"],d:"q"}, {k:["b/4"],d:"8r"}, {k:["c/5"],d:"8"}, {k:["b/4"],d:"qr"}, {k:["f/4"],d:"q"} ],
-        events: [{beat:0, sub:0, inst:"kick"}, {beat:1, sub:1, inst:"snare"}, {beat:3, sub:0, inst:"kick"}]
-      },
-      // 11. Two-Voice Continuous 8ths: Snare Down, Kick Up (Beat 1)
-      {
-        notes: [ {k:["c/5"],d:"8"}, {k:["f/4"],d:"8"}, {k:["b/4"],d:"qr"}, {k:["b/4"],d:"qr"}, {k:["b/4"],d:"qr"} ],
-        events: [{beat:0, sub:0, inst:"snare"}, {beat:0, sub:1, inst:"kick"}]
-      },
-      // 12. Two-Voice Continuous 8ths: Snare Down, Kick Up (Beat 3)
-      {
-        notes: [ {k:["b/4"],d:"qr"}, {k:["b/4"],d:"qr"}, {k:["c/5"],d:"8"}, {k:["f/4"],d:"8"}, {k:["b/4"],d:"qr"} ],
-        events: [{beat:2, sub:0, inst:"snare"}, {beat:2, sub:1, inst:"kick"}]
-      },
-      // 13. Double Offbeat: Snare Beat 3 Off + Kick Beat 4 Off (Push to next bar)
-      {
-        notes: [ {k:["b/4"],d:"qr"}, {k:["b/4"],d:"qr"}, {k:["b/4"],d:"8r"}, {k:["c/5"],d:"8"}, {k:["b/4"],d:"8r"}, {k:["f/4"],d:"8"} ],
-        events: [{beat:2, sub:1, inst:"snare"}, {beat:3, sub:1, inst:"kick"}]
-      },
-      // 14. Elvin 3-Beat Motive: Snare Up -> Kick Down -> Kick Up
-      {
-        notes: [ {k:["b/4"],d:"8r"}, {k:["c/5"],d:"8"}, {k:["f/4"],d:"q"}, {k:["b/4"],d:"qr"}, {k:["b/4"],d:"8r"}, {k:["f/4"],d:"8"} ],
-        events: [{beat:0, sub:1, inst:"snare"}, {beat:1, sub:0, inst:"kick"}, {beat:3, sub:1, inst:"kick"}]
-      },
-      // 15. Broken-Time (Jack DeJohnette style: sparse placement)
-      {
-        notes: [ {k:["b/4"],d:"qr"}, {k:["c/5"],d:"8"}, {k:["b/4"],d:"8r"}, {k:["b/4"],d:"qr"}, {k:["f/4"],d:"q"} ],
-        events: [{beat:1, sub:0, inst:"snare"}, {beat:3, sub:0, inst:"kick"}]
-      },
-      // 16. Snare 3-Beat phrase
-      {
-        notes: [ {k:["c/5"],d:"q"}, {k:["b/4"],d:"8r"}, {k:["c/5"],d:"8"}, {k:["b/4"],d:"8r"}, {k:["f/4"],d:"8"}, {k:["b/4"],d:"qr"} ],
-        events: [{beat:0, sub:0, inst:"snare"}, {beat:1, sub:1, inst:"snare"}, {beat:2, sub:1, inst:"kick"}]
-      },
-      // 17. Feathering with Snare 2 & 4 Upbeats
-      {
-        notes: [ {k:["f/4"],d:"q"}, {k:["b/4"],d:"8r"}, {k:["c/5"],d:"8"}, {k:["f/4"],d:"q"}, {k:["b/4"],d:"8r"}, {k:["c/5"],d:"8"} ],
-        events: [{beat:0, sub:0, inst:"kick"}, {beat:1, sub:1, inst:"snare"}, {beat:2, sub:0, inst:"kick"}, {beat:3, sub:1, inst:"snare"}]
-      },
-      // 18. Kick Bomb on Beat 2 Down & Snare on Beat 4 Off
-      {
-        notes: [ {k:["b/4"],d:"qr"}, {k:["f/4"],d:"q"}, {k:["b/4"],d:"qr"}, {k:["b/4"],d:"8r"}, {k:["c/5"],d:"8"} ],
-        events: [{beat:1, sub:0, inst:"kick"}, {beat:3, sub:1, inst:"snare"}]
-      },
-      // 19. Two-Voice Cross Dialogue: Kick Up -> Snare Up
-      {
-        notes: [ {k:["b/4"],d:"8r"}, {k:["f/4"],d:"8"}, {k:["b/4"],d:"8r"}, {k:["c/5"],d:"8"}, {k:["b/4"],d:"qr"}, {k:["b/4"],d:"qr"} ],
-        events: [{beat:0, sub:1, inst:"kick"}, {beat:1, sub:1, inst:"snare"}]
-      },
-      // 20. Two-Voice Cross Dialogue: Snare Up -> Kick Up
-      {
-        notes: [ {k:["b/4"],d:"qr"}, {k:["b/4"],d:"qr"}, {k:["b/4"],d:"8r"}, {k:["c/5"],d:"8"}, {k:["b/4"],d:"8r"}, {k:["f/4"],d:"8"} ],
-        events: [{beat:2, sub:1, inst:"snare"}, {beat:3, sub:1, inst:"kick"}]
-      },
-      // 21. Subtle Comping: Only Beat 3 Offbeat Snare
-      {
-        notes: [ {k:["b/4"],d:"qr"}, {k:["b/4"],d:"qr"}, {k:["b/4"],d:"8r"}, {k:["c/5"],d:"8"}, {k:["b/4"],d:"qr"} ],
-        events: [{beat:2, sub:1, inst:"snare"}]
-      },
-      // 22. Subtle Comping: Only Beat 2 Kick Down
-      {
-        notes: [ {k:["b/4"],d:"qr"}, {k:["f/4"],d:"q"}, {k:["b/4"],d:"qr"}, {k:["b/4"],d:"qr"} ],
-        events: [{beat:1, sub:0, inst:"kick"}]
-      },
-      // 23. Snare Drop: Beat 1 Down + Beat 2 Off + Beat 4 Down
-      {
-        notes: [ {k:["c/5"],d:"q"}, {k:["b/4"],d:"8r"}, {k:["c/5"],d:"8"}, {k:["b/4"],d:"qr"}, {k:["c/5"],d:"q"} ],
-        events: [{beat:0, sub:0, inst:"snare"}, {beat:1, sub:1, inst:"snare"}, {beat:3, sub:0, inst:"snare"}]
-      },
-      // 24. Kick Drop: Beat 1 Off + Beat 2 Off + Beat 3 Down
-      {
-        notes: [ {k:["b/4"],d:"8r"}, {k:["f/4"],d:"8"}, {k:["b/4"],d:"8r"}, {k:["f/4"],d:"8"}, {k:["f/4"],d:"q"}, {k:["b/4"],d:"qr"} ],
-        events: [{beat:0, sub:1, inst:"kick"}, {beat:1, sub:1, inst:"kick"}, {beat:2, sub:0, inst:"kick"}]
-      }
+      // --- Basic Snare Offbeats & Accents (The Art of Bop Drumming) ---
+      { notes: [{k:["b/4"],d:"qr"},{k:["b/4"],d:"qr"},{k:["b/4"],d:"qr"},{k:["b/4"],d:"8r"},{k:["c/5"],d:"8"}], events: [{beat:3,sub:1,inst:"snare"}] },
+      { notes: [{k:["b/4"],d:"qr"},{k:["b/4"],d:"8r"},{k:["c/5"],d:"8"},{k:["b/4"],d:"qr"},{k:["b/4"],d:"qr"}], events: [{beat:1,sub:1,inst:"snare"}] },
+      { notes: [{k:["b/4"],d:"8r"},{k:["c/5"],d:"8"},{k:["b/4"],d:"qr"},{k:["b/4"],d:"8r"},{k:["c/5"],d:"8"},{k:["b/4"],d:"qr"}], events: [{beat:0,sub:1,inst:"snare"},{beat:2,sub:1,inst:"snare"}] },
+      { notes: [{k:["b/4"],d:"qr"},{k:["b/4"],d:"8r"},{k:["c/5"],d:"8"},{k:["b/4"],d:"qr"},{k:["b/4"],d:"8r"},{k:["c/5"],d:"8"}], events: [{beat:1,sub:1,inst:"snare"},{beat:3,sub:1,inst:"snare"}] },
+      { notes: [{k:["b/4"],d:"8r"},{k:["c/5"],d:"8"},{k:["b/4"],d:"qr"},{k:["b/4"],d:"qr"},{k:["b/4"],d:"8r"},{k:["c/5"],d:"8"}], events: [{beat:0,sub:1,inst:"snare"},{beat:3,sub:1,inst:"snare"}] },
+      { notes: [{k:["b/4"],d:"qr"},{k:["c/5"],d:"q"},{k:["b/4"],d:"qr"},{k:["c/5"],d:"q"}], events: [{beat:1,sub:0,inst:"snare"},{beat:3,sub:0,inst:"snare"}] },
+      { notes: [{k:["c/5"],d:"q"},{k:["b/4"],d:"qr"},{k:["b/4"],d:"8r"},{k:["c/5"],d:"8"},{k:["b/4"],d:"qr"}], events: [{beat:0,sub:0,inst:"snare"},{beat:2,sub:1,inst:"snare"}] },
+      { notes: [{k:["b/4"],d:"qr"},{k:["c/5"],d:"8"},{k:["c/5"],d:"8"},{k:["b/4"],d:"qr"},{k:["b/4"],d:"8r"},{k:["c/5"],d:"8"}], events: [{beat:1,sub:0,inst:"snare"},{beat:1,sub:1,inst:"snare"},{beat:3,sub:1,inst:"snare"}] },
+
+      // --- Basic Kick Drops & Offbeats ---
+      { notes: [{k:["b/4"],d:"qr"},{k:["b/4"],d:"qr"},{k:["b/4"],d:"qr"},{k:["b/4"],d:"8r"},{k:["f/4"],d:"8"}], events: [{beat:3,sub:1,inst:"kick"}] },
+      { notes: [{k:["f/4"],d:"q"},{k:["b/4"],d:"qr"},{k:["f/4"],d:"q"},{k:["b/4"],d:"qr"}], events: [{beat:0,sub:0,inst:"kick"},{beat:2,sub:0,inst:"kick"}] },
+      { notes: [{k:["b/4"],d:"qr"},{k:["b/4"],d:"8r"},{k:["f/4"],d:"8"},{k:["b/4"],d:"qr"},{k:["f/4"],d:"q"}], events: [{beat:1,sub:1,inst:"kick"},{beat:3,sub:0,inst:"kick"}] },
+      { notes: [{k:["b/4"],d:"8r"},{k:["f/4"],d:"8"},{k:["b/4"],d:"qr"},{k:["b/4"],d:"8r"},{k:["f/4"],d:"8"},{k:["b/4"],d:"qr"}], events: [{beat:0,sub:1,inst:"kick"},{beat:2,sub:1,inst:"kick"}] },
+      { notes: [{k:["b/4"],d:"qr"},{k:["f/4"],d:"q"},{k:["b/4"],d:"qr"},{k:["b/4"],d:"qr"}], events: [{beat:1,sub:0,inst:"kick"}] },
+      { notes: [{k:["b/4"],d:"qr"},{k:["b/4"],d:"qr"},{k:["b/4"],d:"8r"},{k:["f/4"],d:"8"},{k:["b/4"],d:"qr"}], events: [{beat:2,sub:1,inst:"kick"}] },
+
+      // --- Two-Voice Dialogue (Snare + Kick Interplay) ---
+      { notes: [{k:["b/4"],d:"8r"},{k:["c/5"],d:"8"},{k:["b/4"],d:"qr"},{k:["b/4"],d:"8r"},{k:["f/4"],d:"8"},{k:["b/4"],d:"qr"}], events: [{beat:0,sub:1,inst:"snare"},{beat:2,sub:1,inst:"kick"}] },
+      { notes: [{k:["b/4"],d:"qr"},{k:["b/4"],d:"8r"},{k:["c/5"],d:"8"},{k:["b/4"],d:"qr"},{k:["b/4"],d:"8r"},{k:["f/4"],d:"8"}], events: [{beat:1,sub:1,inst:"snare"},{beat:3,sub:1,inst:"kick"}] },
+      { notes: [{k:["b/4"],d:"8r"},{k:["f/4"],d:"8"},{k:["b/4"],d:"8r"},{k:["c/5"],d:"8"},{k:["b/4"],d:"qr"},{k:["b/4"],d:"qr"}], events: [{beat:0,sub:1,inst:"kick"},{beat:1,sub:1,inst:"snare"}] },
+      { notes: [{k:["b/4"],d:"qr"},{k:["b/4"],d:"qr"},{k:["b/4"],d:"8r"},{k:["c/5"],d:"8"},{k:["b/4"],d:"8r"},{k:["f/4"],d:"8"}], events: [{beat:2,sub:1,inst:"snare"},{beat:3,sub:1,inst:"kick"}] },
+      { notes: [{k:["f/4"],d:"q"},{k:["b/4"],d:"8r"},{k:["c/5"],d:"8"},{k:["b/4"],d:"qr"},{k:["f/4"],d:"q"}], events: [{beat:0,sub:0,inst:"kick"},{beat:1,sub:1,inst:"snare"},{beat:3,sub:0,inst:"kick"}] },
+      { notes: [{k:["c/5"],d:"8"},{k:["f/4"],d:"8"},{k:["b/4"],d:"qr"},{k:["b/4"],d:"qr"},{k:["b/4"],d:"qr"}], events: [{beat:0,sub:0,inst:"snare"},{beat:0,sub:1,inst:"kick"}] },
+      { notes: [{k:["b/4"],d:"qr"},{k:["b/4"],d:"qr"},{k:["c/5"],d:"8"},{k:["f/4"],d:"8"},{k:["b/4"],d:"qr"}], events: [{beat:2,sub:0,inst:"snare"},{beat:2,sub:1,inst:"kick"}] },
+      { notes: [{k:["b/4"],d:"qr"},{k:["c/5"],d:"8"},{k:["f/4"],d:"8"},{k:["b/4"],d:"qr"},{k:["b/4"],d:"qr"}], events: [{beat:1,sub:0,inst:"snare"},{beat:1,sub:1,inst:"kick"}] },
+      { notes: [{k:["b/4"],d:"qr"},{k:["b/4"],d:"qr"},{k:["b/4"],d:"qr"},{k:["c/5"],d:"8"},{k:["f/4"],d:"8"}], events: [{beat:3,sub:0,inst:"snare"},{beat:3,sub:1,inst:"kick"}] },
+
+      // --- Beyond Bop: 3-Voice 8th-notes & Syncopated Conversions (pp. 7-10) ---
+      { notes: [{k:["c/5"],d:"8"},{k:["c/5"],d:"8"},{k:["b/4"],d:"8r"},{k:["f/4"],d:"8"},{k:["b/4"],d:"qr"},{k:["b/4"],d:"qr"}], events: [{beat:0,sub:0,inst:"snare"},{beat:0,sub:1,inst:"snare"},{beat:1,sub:1,inst:"kick"}] },
+      { notes: [{k:["b/4"],d:"qr"},{k:["c/5"],d:"8"},{k:["c/5"],d:"8"},{k:["b/4"],d:"8r"},{k:["f/4"],d:"8"},{k:["b/4"],d:"qr"}], events: [{beat:1,sub:0,inst:"snare"},{beat:1,sub:1,inst:"snare"},{beat:2,sub:1,inst:"kick"}] },
+      { notes: [{k:["f/4"],d:"8"},{k:["f/4"],d:"8"},{k:["b/4"],d:"8r"},{k:["c/5"],d:"8"},{k:["b/4"],d:"qr"},{k:["b/4"],d:"qr"}], events: [{beat:0,sub:0,inst:"kick"},{beat:0,sub:1,inst:"kick"},{beat:1,sub:1,inst:"snare"}] },
+      { notes: [{k:["b/4"],d:"8r"},{k:["c/5"],d:"8"},{k:["f/4"],d:"8"},{k:["f/4"],d:"8"},{k:["b/4"],d:"qr"},{k:["b/4"],d:"qr"}], events: [{beat:0,sub:1,inst:"snare"},{beat:1,sub:0,inst:"kick"},{beat:1,sub:1,inst:"kick"}] },
+      { notes: [{k:["b/4"],d:"qr"},{k:["b/4"],d:"8r"},{k:["c/5"],d:"8"},{k:["f/4"],d:"8"},{k:["f/4"],d:"8"},{k:["b/4"],d:"qr"}], events: [{beat:1,sub:1,inst:"snare"},{beat:2,sub:0,inst:"kick"},{beat:2,sub:1,inst:"kick"}] },
+
+      // --- Beyond Bop: Jack DeJohnette "Picture 3" & Broken Time (p. 13) ---
+      { notes: [{k:["b/4"],d:"qr"},{k:["c/5"],d:"8"},{k:["b/4"],d:"8r"},{k:["b/4"],d:"qr"},{k:["f/4"],d:"q"}], events: [{beat:1,sub:0,inst:"snare"},{beat:3,sub:0,inst:"kick"}] },
+      { notes: [{k:["b/4"],d:"8r"},{k:["c/5"],d:"8"},{k:["b/4"],d:"qr"},{k:["f/4"],d:"8"},{k:["b/4"],d:"8r"},{k:["b/4"],d:"qr"}], events: [{beat:0,sub:1,inst:"snare"},{beat:2,sub:0,inst:"kick"}] },
+      { notes: [{k:["c/5"],d:"q"},{k:["b/4"],d:"qr"},{k:["f/4"],d:"q"},{k:["b/4"],d:"8r"},{k:["c/5"],d:"8"}], events: [{beat:0,sub:0,inst:"snare"},{beat:2,sub:0,inst:"kick"},{beat:3,sub:1,inst:"snare"}] },
+      { notes: [{k:["f/4"],d:"q"},{k:["b/4"],d:"8r"},{k:["c/5"],d:"8"},{k:["f/4"],d:"q"},{k:["b/4"],d:"8r"},{k:["c/5"],d:"8"}], events: [{beat:0,sub:0,inst:"kick"},{beat:1,sub:1,inst:"snare"},{beat:2,sub:0,inst:"kick"},{beat:3,sub:1,inst:"snare"}] },
+
+      // --- Beyond Bop: Elvin Jones "All or Nothing At All" 3-Beat Cycle (p. 19) ---
+      { notes: [{k:["b/4"],d:"8r"},{k:["c/5"],d:"8"},{k:["f/4"],d:"q"},{k:["b/4"],d:"qr"},{k:["b/4"],d:"8r"},{k:["f/4"],d:"8"}], events: [{beat:0,sub:1,inst:"snare"},{beat:1,sub:0,inst:"kick"},{beat:3,sub:1,inst:"kick"}] },
+      { notes: [{k:["f/4"],d:"8"},{k:["b/4"],d:"8r"},{k:["c/5"],d:"q"},{k:["b/4"],d:"8r"},{k:["f/4"],d:"8"},{k:["c/5"],d:"q"}], events: [{beat:0,sub:0,inst:"kick"},{beat:1,sub:0,inst:"snare"},{beat:2,sub:1,inst:"kick"},{beat:3,sub:0,inst:"snare"}] },
+      { notes: [{k:["b/4"],d:"8r"},{k:["f/4"],d:"8"},{k:["b/4"],d:"8r"},{k:["f/4"],d:"8"},{k:["f/4"],d:"q"},{k:["b/4"],d:"qr"}], events: [{beat:0,sub:1,inst:"kick"},{beat:1,sub:1,inst:"kick"},{beat:2,sub:0,inst:"kick"}] },
+      { notes: [{k:["c/5"],d:"q"},{k:["b/4"],d:"8r"},{k:["c/5"],d:"8"},{k:["b/4"],d:"qr"},{k:["c/5"],d:"q"}], events: [{beat:0,sub:0,inst:"snare"},{beat:1,sub:1,inst:"snare"},{beat:3,sub:0,inst:"snare"}] },
+
+      // --- Beyond Bop: Tony Williams Style (Quarter-note Hi-hat framework, p. 18) ---
+      { notes: [{k:["c/5"],d:"8"},{k:["b/4"],d:"8r"},{k:["b/4"],d:"qr"},{k:["c/5"],d:"8"},{k:["b/4"],d:"8r"},{k:["f/4"],d:"q"}], events: [{beat:0,sub:0,inst:"snare"},{beat:2,sub:0,inst:"snare"},{beat:3,sub:0,inst:"kick"}] },
+      { notes: [{k:["b/4"],d:"qr"},{k:["f/4"],d:"q"},{k:["c/5"],d:"8"},{k:["b/4"],d:"8r"},{k:["b/4"],d:"8r"},{k:["f/4"],d:"8"}], events: [{beat:1,sub:0,inst:"kick"},{beat:2,sub:0,inst:"snare"},{beat:3,sub:1,inst:"kick"}] },
+      { notes: [{k:["c/5"],d:"q"},{k:["b/4"],d:"8r"},{k:["c/5"],d:"8"},{k:["b/4"],d:"8r"},{k:["f/4"],d:"8"},{k:["b/4"],d:"qr"}], events: [{beat:0,sub:0,inst:"snare"},{beat:1,sub:1,inst:"snare"},{beat:2,sub:1,inst:"kick"}] },
+      { notes: [{k:["b/4"],d:"8r"},{k:["c/5"],d:"8"},{k:["b/4"],d:"8r"},{k:["c/5"],d:"8"},{k:["b/4"],d:"8r"},{k:["f/4"],d:"8"},{k:["b/4"],d:"qr"}], events: [{beat:0,sub:1,inst:"snare"},{beat:1,sub:1,inst:"snare"},{beat:2,sub:1,inst:"kick"}] }
     ];
 
     // =========================================================================
-    // ジョン・ライリーのビバップ・フィルイン集 (Bar 8 用)
+    // フィルイン・ボキャブラリー (各長さ対応)
     // =========================================================================
-    const fillVocab = [
-      // Fill 1: Classic Dropping Bombs (Snare 8ths + Kick Bombs)
+
+    // --- 2拍フィル (Bar 8の後半2拍) ---
+    const fills2Beats = [
       {
-        notes: [
-          {k:["c/5"],d:"8"}, {k:["c/5"],d:"8"}, {k:["f/4"],d:"q"},
-          {k:["c/5"],d:"8"}, {k:["c/5"],d:"8"}, {k:["f/4"],d:"q"}
-        ],
+        notes: [{k:["c/5"],d:"8"},{k:["c/5"],d:"8"},{k:["f/4"],d:"q"}],
+        play: (time, upbeat, snare, kick) => {
+          const q = Tone.Time("4n").toSeconds();
+          snare.triggerAttackRelease("16n", time);
+          snare.triggerAttackRelease("16n", time + upbeat);
+          kick.triggerAttackRelease("C1", "8n", time + q);
+        }
+      },
+      {
+        notes: [{k:["c/5"],d:"16"},{k:["c/5"],d:"16"},{k:["f/4"],d:"16"},{k:["f/4"],d:"16"},{k:["c/5"],d:"q"}],
+        play: (time, upbeat, snare, kick) => {
+          const q = Tone.Time("4n").toSeconds();
+          const sx = q / 4;
+          snare.triggerAttackRelease("16n", time);
+          snare.triggerAttackRelease("16n", time + sx);
+          kick.triggerAttackRelease("C1", "8n", time + sx * 2);
+          kick.triggerAttackRelease("C1", "8n", time + sx * 3);
+          snare.triggerAttackRelease("16n", time + q);
+        }
+      },
+      {
+        notes: [{k:["b/4"],d:"8r"},{k:["c/5"],d:"8"},{k:["f/4"],d:"q"}],
+        play: (time, upbeat, snare, kick) => {
+          const q = Tone.Time("4n").toSeconds();
+          snare.triggerAttackRelease("16n", time + upbeat);
+          kick.triggerAttackRelease("C1", "8n", time + q);
+        }
+      },
+      {
+        notes: [{k:["c/5"],d:"8"},{k:["f/4"],d:"8"},{k:["c/5"],d:"8"},{k:["f/4"],d:"8"}],
+        play: (time, upbeat, snare, kick) => {
+          const q = Tone.Time("4n").toSeconds();
+          snare.triggerAttackRelease("16n", time);
+          kick.triggerAttackRelease("C1", "8n", time + upbeat);
+          snare.triggerAttackRelease("16n", time + q);
+          kick.triggerAttackRelease("C1", "8n", time + q + upbeat);
+        }
+      }
+    ];
+
+    // --- 1小節フィル (Bar 8 丸ごと) ---
+    const fills1Bar = [
+      // 1. Classic Dropping Bombs
+      {
+        notes: [{k:["c/5"],d:"8"},{k:["c/5"],d:"8"},{k:["f/4"],d:"q"},{k:["c/5"],d:"8"},{k:["c/5"],d:"8"},{k:["f/4"],d:"q"}],
         play: (time, upbeat, snare, kick) => {
           const q = Tone.Time("4n").toSeconds();
           snare.triggerAttackRelease("16n", time);
@@ -229,13 +214,9 @@
           kick.triggerAttackRelease("C1", "8n", time + q * 3);
         }
       },
-      // Fill 2: Triplets in Groups of 4 (16th note 4-Grouping)
+      // 2. Triplets in Groups of 4 (p. 47)
       {
-        notes: [
-          {k:["c/5"],d:"16"}, {k:["c/5"],d:"16"}, {k:["f/4"],d:"16"}, {k:["f/4"],d:"16"},
-          {k:["c/5"],d:"16"}, {k:["c/5"],d:"16"}, {k:["f/4"],d:"16"}, {k:["f/4"],d:"16"},
-          {k:["c/5"],d:"q"}, {k:["f/4"],d:"q"}
-        ],
+        notes: [{k:["c/5"],d:"16"},{k:["c/5"],d:"16"},{k:["f/4"],d:"16"},{k:["f/4"],d:"16"},{k:["c/5"],d:"16"},{k:["c/5"],d:"16"},{k:["f/4"],d:"16"},{k:["f/4"],d:"16"},{k:["c/5"],d:"q"},{k:["f/4"],d:"q"}],
         play: (time, upbeat, snare, kick) => {
           const q = Tone.Time("4n").toSeconds();
           const sx = q / 4;
@@ -250,12 +231,9 @@
           kick.triggerAttackRelease("C1", "8n", time + q * 3);
         }
       },
-      // Fill 3: 3-Beat Phrases (Beyond Bop p.47)
+      // 3. Three-beat Phrases (Beyond Bop p. 46)
       {
-        notes: [
-          {k:["c/5"],d:"8"}, {k:["f/4"],d:"8"}, {k:["c/5"],d:"q"},
-          {k:["f/4"],d:"8"}, {k:["c/5"],d:"8"}, {k:["f/4"],d:"q"}
-        ],
+        notes: [{k:["c/5"],d:"8"},{k:["f/4"],d:"8"},{k:["c/5"],d:"q"},{k:["f/4"],d:"8"},{k:["c/5"],d:"8"},{k:["f/4"],d:"q"}],
         play: (time, upbeat, snare, kick) => {
           const q = Tone.Time("4n").toSeconds();
           snare.triggerAttackRelease("16n", time);
@@ -266,14 +244,9 @@
           kick.triggerAttackRelease("C1", "8n", time + q * 3);
         }
       },
-      // Fill 4: Variable Speed Phrase (16ths to 8ths)
+      // 4. Variable Speed Phrase (16ths to 8ths, p. 46)
       {
-        notes: [
-          {k:["c/5"],d:"16"}, {k:["c/5"],d:"16"}, {k:["f/4"],d:"16"}, {k:["f/4"],d:"16"},
-          {k:["c/5"],d:"8"}, {k:["f/4"],d:"8"},
-          {k:["c/5"],d:"8"}, {k:["f/4"],d:"8"},
-          {k:["c/5"],d:"q"}
-        ],
+        notes: [{k:["c/5"],d:"16"},{k:["c/5"],d:"16"},{k:["f/4"],d:"16"},{k:["f/4"],d:"16"},{k:["c/5"],d:"8"},{k:["f/4"],d:"8"},{k:["c/5"],d:"8"},{k:["f/4"],d:"8"},{k:["c/5"],d:"q"}],
         play: (time, upbeat, snare, kick) => {
           const q = Tone.Time("4n").toSeconds();
           const sx = q / 4;
@@ -288,12 +261,9 @@
           snare.triggerAttackRelease("16n", time + q * 3);
         }
       },
-      // Fill 5: Max Roach / Philly Joe Jones Cross Accent
+      // 5. Max Roach Cross Accent
       {
-        notes: [
-          {k:["c/5"],d:"8"}, {k:["c/5"],d:"8"}, {k:["c/5"],d:"8"}, {k:["f/4"],d:"8"},
-          {k:["c/5"],d:"8"}, {k:["c/5"],d:"8"}, {k:["f/4"],d:"q"}
-        ],
+        notes: [{k:["c/5"],d:"8"},{k:["c/5"],d:"8"},{k:["c/5"],d:"8"},{k:["f/4"],d:"8"},{k:["c/5"],d:"8"},{k:["c/5"],d:"8"},{k:["f/4"],d:"q"}],
         play: (time, upbeat, snare, kick) => {
           const q = Tone.Time("4n").toSeconds();
           snare.triggerAttackRelease("16n", time);
@@ -305,29 +275,9 @@
           kick.triggerAttackRelease("C1", "8n", time + q * 3);
         }
       },
-      // Fill 6: Descending Roll with Kick Accents
+      // 6. Syncopated Kick Bombs (Tony Williams)
       {
-        notes: [
-          {k:["c/5"],d:"16"}, {k:["c/5"],d:"16"}, {k:["c/5"],d:"16"}, {k:["c/5"],d:"16"},
-          {k:["f/4"],d:"q"},
-          {k:["c/5"],d:"16"}, {k:["c/5"],d:"16"}, {k:["c/5"],d:"16"}, {k:["c/5"],d:"16"},
-          {k:["f/4"],d:"q"}
-        ],
-        play: (time, upbeat, snare, kick) => {
-          const q = Tone.Time("4n").toSeconds();
-          const sx = q / 4;
-          [0, 1, 2, 3].forEach(n => snare.triggerAttackRelease("16n", time + n * sx));
-          kick.triggerAttackRelease("C1", "8n", time + q);
-          [0, 1, 2, 3].forEach(n => snare.triggerAttackRelease("16n", time + q * 2 + n * sx));
-          kick.triggerAttackRelease("C1", "8n", time + q * 3);
-        }
-      },
-      // Fill 7: Syncopated Kick Bomb (Tony Williams Style)
-      {
-        notes: [
-          {k:["b/4"],d:"8r"}, {k:["f/4"],d:"8"}, {k:["c/5"],d:"q"},
-          {k:["b/4"],d:"8r"}, {k:["f/4"],d:"8"}, {k:["c/5"],d:"q"}
-        ],
+        notes: [{k:["b/4"],d:"8r"},{k:["f/4"],d:"8"},{k:["c/5"],d:"q"},{k:["b/4"],d:"8r"},{k:["f/4"],d:"8"},{k:["c/5"],d:"q"}],
         play: (time, upbeat, snare, kick) => {
           const q = Tone.Time("4n").toSeconds();
           kick.triggerAttackRelease("C1", "8n", time + upbeat);
@@ -336,12 +286,9 @@
           snare.triggerAttackRelease("16n", time + q * 3);
         }
       },
-      // Fill 8: Linear 4-Way Phrase
+      // 7. Linear 4-Way Phrase
       {
-        notes: [
-          {k:["c/5"],d:"8"}, {k:["f/4"],d:"8"}, {k:["c/5"],d:"8"}, {k:["f/4"],d:"8"},
-          {k:["c/5"],d:"8"}, {k:["f/4"],d:"8"}, {k:["c/5"],d:"8"}, {k:["f/4"],d:"8"}
-        ],
+        notes: [{k:["c/5"],d:"8"},{k:["f/4"],d:"8"},{k:["c/5"],d:"8"},{k:["f/4"],d:"8"},{k:["c/5"],d:"8"},{k:["f/4"],d:"8"},{k:["c/5"],d:"8"},{k:["f/4"],d:"8"}],
         play: (time, upbeat, snare, kick) => {
           const q = Tone.Time("4n").toSeconds();
           [0, 1, 2, 3].forEach(b => {
@@ -349,106 +296,147 @@
             kick.triggerAttackRelease("C1", "8n", time + b * q + upbeat);
           });
         }
-      },
-      // Fill 9: Triplet feel emulation (Group of 3 against pulse)
-      {
-        notes: [
-          {k:["c/5"],d:"q"}, {k:["c/5"],d:"8"}, {k:["f/4"],d:"8"},
-          {k:["c/5"],d:"q"}, {k:["f/4"],d:"q"}
-        ],
-        play: (time, upbeat, snare, kick) => {
-          const q = Tone.Time("4n").toSeconds();
-          snare.triggerAttackRelease("16n", time);
-          snare.triggerAttackRelease("16n", time + q);
-          kick.triggerAttackRelease("C1", "8n", time + q + upbeat);
-          snare.triggerAttackRelease("16n", time + q * 2);
-          kick.triggerAttackRelease("C1", "8n", time + q * 3);
-        }
-      },
-      // Fill 10: Ending Bomb Setup
-      {
-        notes: [
-          {k:["c/5"],d:"16"}, {k:["c/5"],d:"16"}, {k:["c/5"],d:"16"}, {k:["c/5"],d:"16"},
-          {k:["c/5"],d:"8"}, {k:["f/4"],d:"8"},
-          {k:["f/4"],d:"q"}, {k:["c/5"],d:"q"}
-        ],
-        play: (time, upbeat, snare, kick) => {
-          const q = Tone.Time("4n").toSeconds();
-          const sx = q / 4;
-          [0, 1, 2, 3].forEach(n => snare.triggerAttackRelease("16n", time + n * sx));
-          snare.triggerAttackRelease("16n", time + q);
-          kick.triggerAttackRelease("C1", "8n", time + q + upbeat);
-          kick.triggerAttackRelease("C1", "8n", time + q * 2);
-          snare.triggerAttackRelease("16n", time + q * 3);
-        }
       }
     ];
 
-    // 現在生成されている8小節のエチュードデータ
-    let currentEtude = {
-      bars: [], // 0..6: compingVocab, 7: fillVocab
-    };
-
-    // --- State Variables ---
+    // =========================================================================
+    // 状態管理
+    // =========================================================================
     let isPlaying = false;
     let currentBpm = 120;
-    let practiceMode = "fixed"; // "fixed" or "random"
+    let practiceMode = "random";
+    let fillLengthMode = "1bar"; // "2beats", "1bar", "1bar2beats", "2bars"
 
-    // --- UI Elements ---
+    let currentEtude = {
+      bars: [] // 各小節オブジェクト: { notes: [...], events: [...], playFill: fn }
+    };
+
+    // UI Elements
     const playBtn = document.getElementById('play-btn');
     const bpmSlider = document.getElementById('bpm-slider');
     const bpmDisplay = document.getElementById('bpm-display');
     const statusText = document.getElementById('status-text');
     const beatDisplay = document.getElementById('beat-display');
     const modeSelect = document.getElementById('mode-select');
+    const fillLenSelect = document.getElementById('fill-len-select');
     const regenerateBtn = document.getElementById('regenerate-btn');
 
     // --- エチュード生成ロジック ---
     function generateNewEtude() {
       currentEtude.bars = [];
-      const fillChoice = fillVocab[Math.floor(Math.random() * fillVocab.length)];
+      const fixedCompChoice = compingVocab[Math.floor(Math.random() * compingVocab.length)];
 
-      if (practiceMode === "fixed") {
-        // Fixed: 1〜7小節は同一の1フレーズで固定
-        const compChoice = compingVocab[Math.floor(Math.random() * compingVocab.length)];
-        for (let i = 0; i < 7; i++) {
-          currentEtude.bars.push(compChoice);
-        }
-      } else {
-        // Random: 1〜7小節すべてランダムに配置
-        for (let i = 0; i < 7; i++) {
-          const compChoice = compingVocab[Math.floor(Math.random() * compingVocab.length)];
-          currentEtude.bars.push(compChoice);
-        }
+      function getCompingBar() {
+        return practiceMode === "fixed" ? fixedCompChoice : compingVocab[Math.floor(Math.random() * compingVocab.length)];
       }
-      currentEtude.bars.push(fillChoice);
+
+      if (fillLengthMode === "2beats") {
+        // 1〜7小節: コンピング
+        for (let i = 0; i < 7; i++) currentEtude.bars.push({ ...getCompingBar() });
+        // 8小節目: 拍1-2コンピング + 拍3-4フィル
+        const halfComp = {
+          notes: [{k:["b/4"],d:"qr"},{k:["b/4"],d:"8r"},{k:["c/5"],d:"8"}],
+          events: [{beat:1, sub:1, inst:"snare"}]
+        };
+        const fill2 = fills2Beats[Math.floor(Math.random() * fills2Beats.length)];
+        currentEtude.bars.push({
+          notes: [...halfComp.notes, ...fill2.notes],
+          events: halfComp.events,
+          playFill: (time, upbeat, snare, kick) => {
+            const q = Tone.Time("4n").toSeconds();
+            fill2.play(time + q * 2, upbeat, snare, kick);
+          }
+        });
+
+      } else if (fillLengthMode === "1bar") {
+        // 1〜7小節: コンピング
+        for (let i = 0; i < 7; i++) currentEtude.bars.push({ ...getCompingBar() });
+        // 8小節目: 1小節丸ごとフィル
+        const fill1 = fills1Bar[Math.floor(Math.random() * fills1Bar.length)];
+        currentEtude.bars.push({
+          notes: fill1.notes,
+          events: [],
+          playFill: fill1.play
+        });
+
+      } else if (fillLengthMode === "1bar2beats") {
+        // 1〜6小節: コンピング
+        for (let i = 0; i < 6; i++) currentEtude.bars.push({ ...getCompingBar() });
+        // 7小節目: 拍1-2コンピング + 拍3-4からフィル開始
+        const halfComp = {
+          notes: [{k:["c/5"],d:"q"},{k:["b/4"],d:"qr"}],
+          events: [{beat:0, sub:0, inst:"snare"}]
+        };
+        const fillPart1 = fills2Beats[Math.floor(Math.random() * fills2Beats.length)];
+        const fillPart2 = fills1Bar[Math.floor(Math.random() * fills1Bar.length)];
+        currentEtude.bars.push({
+          notes: [...halfComp.notes, ...fillPart1.notes],
+          events: halfComp.events,
+          playFill: (time, upbeat, snare, kick) => {
+            const q = Tone.Time("4n").toSeconds();
+            fillPart1.play(time + q * 2, upbeat, snare, kick);
+          }
+        });
+        // 8小節目: フィル後半
+        currentEtude.bars.push({
+          notes: fillPart2.notes,
+          events: [],
+          playFill: fillPart2.play
+        });
+
+      } else if (fillLengthMode === "2bars") {
+        // 1〜6小節: コンピング
+        for (let i = 0; i < 6; i++) currentEtude.bars.push({ ...getCompingBar() });
+        // 7〜8小節: 2小節連続フィル
+        const fillA = fills1Bar[Math.floor(Math.random() * fills1Bar.length)];
+        let fillB = fills1Bar[Math.floor(Math.random() * fills1Bar.length)];
+        currentEtude.bars.push({
+          notes: fillA.notes,
+          events: [],
+          playFill: fillA.play
+        });
+        currentEtude.bars.push({
+          notes: fillB.notes,
+          events: [],
+          playFill: fillB.play
+        });
+      }
     }
 
-    modeSelect.addEventListener('change', (e) => {
-      practiceMode = e.target.value;
-      generateNewEtude();
-      drawScore();
-    });
-
-    regenerateBtn.addEventListener('click', () => {
-      generateNewEtude();
-      drawScore();
-    });
-
-    bpmSlider.addEventListener('input', (e) => {
-      currentBpm = Number(e.target.value);
-      bpmDisplay.textContent = currentBpm;
-      if (Tone.Transport.state === "started") Tone.Transport.bpm.value = currentBpm;
-    });
-
-    // --- Audio Setup ---
+    // --- Audio Engine Setup (bigband-jazz-drum-training のクリアなメトロノーム音を再現) ---
     let clickHigh, clickLow, kick, snare;
     function initAudio() {
       if (clickHigh) return;
-      clickHigh = new Tone.Synth({ oscillator: { type: "square" }, envelope: { attack: 0.001, decay: 0.1, sustain: 0, release: 0.01 }, volume: -4 }).toDestination();
-      clickLow = new Tone.Synth({ oscillator: { type: "square" }, envelope: { attack: 0.001, decay: 0.1, sustain: 0, release: 0.01 }, volume: -9 }).toDestination();
-      kick = new Tone.MembraneSynth({ volume: 3 }).toDestination();
-      snare = new Tone.NoiseSynth({ noise: { type: "white" }, envelope: { attack: 0.001, decay: 0.2, sustain: 0 }, volume: 1 }).toDestination();
+      // ピッチド・サイン波によるウッドブロック／カウベルライクなクリアなクリック
+      clickHigh = new Tone.MembraneSynth({
+        pitchDecay: 0.008,
+        octaves: 2,
+        oscillator: { type: "sine" },
+        envelope: { attack: 0.001, decay: 0.05, sustain: 0 },
+        volume: -2
+      }).toDestination();
+
+      clickLow = new Tone.MembraneSynth({
+        pitchDecay: 0.008,
+        octaves: 2,
+        oscillator: { type: "sine" },
+        envelope: { attack: 0.001, decay: 0.04, sustain: 0 },
+        volume: -5
+      }).toDestination();
+
+      kick = new Tone.MembraneSynth({
+        pitchDecay: 0.05,
+        octaves: 4,
+        oscillator: { type: "sine" },
+        envelope: { attack: 0.001, decay: 0.3, sustain: 0.01, release: 0.2 },
+        volume: 3
+      }).toDestination();
+
+      snare = new Tone.NoiseSynth({
+        noise: { type: "white" },
+        envelope: { attack: 0.001, decay: 0.18, sustain: 0 },
+        volume: 1
+      }).toDestination();
     }
 
     // --- Playback Logic ---
@@ -460,6 +448,7 @@
         playBtn.textContent = "START CLICK";
         playBtn.className = "w-full md:w-48 py-4 rounded-xl font-bold text-lg text-white bg-blue-600 hover:bg-blue-700 transition-all shadow-md";
         statusText.textContent = "Ready";
+        statusText.className = "text-xs font-bold text-blue-600 uppercase";
         beatDisplay.textContent = "1-1";
       } else {
         await Tone.start();
@@ -471,16 +460,18 @@
 
         Tone.Transport.scheduleRepeat((time) => {
           const quarter = Tone.Time("4n").toSeconds();
-          const upbeat = quarter * 0.67; // スイングフィール
+          const upbeat = quarter * 0.67; // スイングフィール (3連符裏)
 
-          // メトロノーム (1拍目高音、2-4拍目低音)
-          if (beatCount === 0) clickHigh.triggerAttackRelease("A5", "32n", time, 0.6);
-          else clickLow.triggerAttackRelease("A4", "32n", time, 0.6);
+          // メトロノーム (1拍目は高いG5、2-4拍目はC5)
+          if (beatCount === 0) clickHigh.triggerAttackRelease("G5", "32n", time, 1.0);
+          else clickLow.triggerAttackRelease("C5", "32n", time, 0.8);
 
-          // ドラム音再生
-          if (barCount <= 7) {
-            const barData = currentEtude.bars[barCount - 1];
-            if (barData && barData.events) {
+          const barData = currentEtude.bars[barCount - 1];
+
+          // 演奏判定
+          if (barData) {
+            // コンピング音
+            if (barData.events && barData.events.length > 0) {
               barData.events.forEach(ev => {
                 if (ev.beat === beatCount) {
                   const evTime = ev.sub === 0 ? time : time + upbeat;
@@ -489,27 +480,26 @@
                 }
               });
             }
-          } else {
-            // 8小節目: フィルイン
-            if (beatCount === 0) {
-              const fillData = currentEtude.bars[7];
-              if (fillData && fillData.play) {
-                fillData.play(time, upbeat, snare, kick);
-              }
+            // フィルイン音
+            if (beatCount === 0 && barData.playFill) {
+              barData.playFill(time, upbeat, snare, kick);
             }
           }
 
           // UI更新
           Tone.Draw.schedule(() => {
             beatDisplay.textContent = `${barCount}-${beatCount + 1}`;
-            if (beatCount === 0) {
-              if (barCount === 8) {
-                statusText.textContent = "Bar 8: Fill-in";
-                statusText.className = "text-xs font-bold text-red-500 uppercase tracking-wider";
-              } else {
-                statusText.textContent = `Bar ${barCount}: Comping`;
-                statusText.className = "text-xs font-bold text-blue-600 uppercase tracking-wider";
-              }
+            const isFillBar = (fillLengthMode === "2bars" && barCount >= 7) ||
+                              (fillLengthMode === "1bar2beats" && (barCount === 8 || (barCount === 7 && beatCount >= 2))) ||
+                              (fillLengthMode === "1bar" && barCount === 8) ||
+                              (fillLengthMode === "2beats" && barCount === 8 && beatCount >= 2);
+
+            if (isFillBar) {
+              statusText.textContent = `Bar ${barCount}: Fill-in`;
+              statusText.className = "text-xs font-bold text-red-500 uppercase tracking-wider";
+            } else {
+              statusText.textContent = `Bar ${barCount}: Comping`;
+              statusText.className = "text-xs font-bold text-blue-600 uppercase tracking-wider";
             }
           }, time);
 
@@ -533,7 +523,6 @@
         playBtn.className = "w-full md:w-48 py-4 rounded-xl font-bold text-lg text-red-600 bg-red-100 hover:bg-red-200 transition-all shadow-md";
       }
     }
-    playBtn.addEventListener('click', togglePlayback);
 
     // --- VexFlow 楽譜描画 ---
     function drawScore() {
@@ -563,7 +552,7 @@
 
         const stave = new VF.Stave(currentX, currentY, width);
 
-        // 先頭のみ打楽器記号を付与、4/4表記は不要のため付与しない
+        // 先頭のみ打楽器記号を付与、4/4表記は完全に不要
         if (isStartOfLine) {
           stave.addClef("percussion");
           stave.setBegBarType(VF.Barline.type.SINGLE);
@@ -583,7 +572,7 @@
         const notes = barItem.notes.map(nd => new VF.StaveNote({ clef: "percussion", keys: nd.k, duration: nd.d }));
         vfNotes.push(notes);
 
-        // VexFlowの標準ビーム自動生成（フラグとビームの重複を完全防止）
+        // 自動ビーム生成 (休符を巻き込まず美しく連桁)
         const autoBeams = VF.Beam.generateBeams(notes, {
           beam_rests: false,
           maintain_stem_directions: true
@@ -598,6 +587,32 @@
       }
       beamsToDraw.forEach(beam => beam.setContext(context).draw());
     }
+
+    // --- イベントリスナー ---
+    modeSelect.addEventListener('change', (e) => {
+      practiceMode = e.target.value;
+      generateNewEtude();
+      drawScore();
+    });
+
+    fillLenSelect.addEventListener('change', (e) => {
+      fillLengthMode = e.target.value;
+      generateNewEtude();
+      drawScore();
+    });
+
+    regenerateBtn.addEventListener('click', () => {
+      generateNewEtude();
+      drawScore();
+    });
+
+    bpmSlider.addEventListener('input', (e) => {
+      currentBpm = Number(e.target.value);
+      bpmDisplay.textContent = currentBpm;
+      if (Tone.Transport.state === "started") Tone.Transport.bpm.value = currentBpm;
+    });
+
+    playBtn.addEventListener('click', togglePlayback);
 
     // 初期生成 & 描画
     generateNewEtude();
