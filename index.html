@@ -47,7 +47,7 @@
       <div class="grid grid-cols-1 sm:grid-cols-3 gap-4 border-t pt-4 border-gray-100 items-end">
         <div>
           <label class="block text-xs font-bold text-gray-400 uppercase tracking-wider mb-2">Practice Mode</label>
-          <select id="mode-select" class="w-full p-2.5 border border-gray-300 rounded-lg bg-white text-gray-800 font-medium focus:outline-none focus:border-blue-500">
+          <select id="mode-select" class="w-full p-2.5 border border-gray-300 rounded-lg bg-white text-gray-800 font-medium focus:outline-none focus:border-blue-500 disabled:opacity-50 disabled:bg-gray-100 disabled:cursor-not-allowed">
             <option value="fixed">Fixed Pattern</option>
             <option value="random" selected>Random Pattern</option>
           </select>
@@ -55,7 +55,7 @@
 
         <div>
           <label class="block text-xs font-bold text-gray-400 uppercase tracking-wider mb-2">Fill-in Length</label>
-          <select id="fill-len-select" class="w-full p-2.5 border border-gray-300 rounded-lg bg-white text-gray-800 font-medium focus:outline-none focus:border-blue-500">
+          <select id="fill-len-select" class="w-full p-2.5 border border-gray-300 rounded-lg bg-white text-gray-800 font-medium focus:outline-none focus:border-blue-500 disabled:opacity-50 disabled:bg-gray-100 disabled:cursor-not-allowed">
             <option value="2beats">2 Beats (Bar 8, Beats 3-4)</option>
             <option value="1bar" selected>1 Bar (Bar 8)</option>
             <option value="1bar2beats">1 Bar + 2 Beats (Bar 7 Beat 3 ~ Bar 8)</option>
@@ -64,7 +64,7 @@
         </div>
 
         <div>
-          <button id="regenerate-btn" class="w-full py-2.5 px-4 border-2 border-blue-500 rounded-lg bg-blue-50 text-blue-700 font-bold hover:bg-blue-100 transition-colors shadow-sm">
+          <button id="regenerate-btn" class="w-full py-2.5 px-4 border-2 border-blue-500 rounded-lg bg-blue-50 text-blue-700 font-bold hover:bg-blue-100 transition-colors shadow-sm disabled:opacity-50 disabled:border-gray-300 disabled:text-gray-400 disabled:bg-gray-100 disabled:cursor-not-allowed">
             Regenerate
           </button>
         </div>
@@ -86,7 +86,7 @@
     <!-- 楽譜表示エリア -->
     <div class="book-page p-6 rounded-xl flex flex-col items-center overflow-x-auto">
       <div id="score-container" class="w-full flex justify-center min-w-[800px]"></div>
-      <p class="text-sm text-gray-500 mt-6 text-center">※ライドとハイハットは4/4ジャズパターンをキープし、記譜されたスネア(上段)とキック(下段)を演奏、必要に応じてオーケストレーションしてください。</p>
+      <p class="text-sm text-gray-500 mt-6 text-center">※ライドとハイハットは4/4ジャズパターンをキープし、記譜されたスネア(上段)とキック(下段)を演奏してください。</p>
     </div>
 
   </div>
@@ -542,10 +542,20 @@
         statusText.textContent = "Ready";
         statusText.className = "text-xs font-bold text-blue-600 uppercase";
         beatDisplay.textContent = "1-1";
+
+        // 再生停止時にUIのロックを解除
+        modeSelect.disabled = false;
+        fillLenSelect.disabled = false;
+        regenerateBtn.disabled = false;
       } else {
         await Tone.start();
         initAudio();
         Tone.Transport.bpm.value = currentBpm;
+
+        // 再生中は設定変更・再生成をロック
+        modeSelect.disabled = true;
+        fillLenSelect.disabled = true;
+        regenerateBtn.disabled = true;
 
         let barCount = 1;
         let beatCount = 0;
@@ -591,10 +601,7 @@
             barCount++;
             if (barCount > 8) {
               barCount = 1;
-              if (practiceMode === "random") {
-                generateNewEtude();
-                Tone.Draw.schedule(() => drawScore(), time + quarter);
-              }
+              // 8小節終了後も自動更新せず、同じエチュードをループして練習
             }
           }
         }, "4n");
