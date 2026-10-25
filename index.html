@@ -118,18 +118,18 @@
       { notes: [{k:["b/4"],d:"qr"},{k:["b/4"],d:"8r"},{k:["c/5"],d:"8"},{k:["b/4"],d:"8r"},{k:["c/5"],d:"8"},{k:["b/4"],d:"qr"}], events: [{t:1.67,inst:"snare"},{t:2.67,inst:"snare"}] },
 
       // --- Comp Example 2: 3連符コンピング (pp. 22-23) ---
-      // 1拍目3連符 (休-休-音) + 3拍目3連符 (休-休-音)
+      // 2拍目・4拍目に「音-音-休」(3連符の1つ目と2つ目を叩くコンピング)
       { 
         notes: [
-          {k:["b/4"],d:"8r"},{k:["b/4"],d:"8r"},{k:["c/5"],d:"8"},
           {k:["b/4"],d:"qr"},
-          {k:["b/4"],d:"8r"},{k:["b/4"],d:"8r"},{k:["c/5"],d:"8"},
-          {k:["b/4"],d:"qr"}
+          {k:["c/5"],d:"8"},{k:["c/5"],d:"8"},{k:["b/4"],d:"8r"},
+          {k:["b/4"],d:"qr"},
+          {k:["c/5"],d:"8"},{k:["c/5"],d:"8"},{k:["b/4"],d:"8r"}
         ],
-        tuplets: [[0, 3], [4, 7]],
-        events: [{t:0.67,inst:"snare"},{t:2.67,inst:"snare"}] 
+        tuplets: [[1, 4], [5, 8]],
+        events: [{t:1.0,inst:"snare"},{t:1.33,inst:"snare"},{t:3.0,inst:"snare"},{t:3.33,inst:"snare"}] 
       },
-      // 2拍目3連符 (音-休-音) + 4拍目3連符 (音-休-音)
+      // 2拍目3連符 (音-休-音: 1つ目と3つ目の両方打鍵) + 4拍目3連符 (音-休-音)
       { 
         notes: [
           {k:["b/4"],d:"qr"},
@@ -174,6 +174,17 @@
           {t:1.0,inst:"snare"},{t:1.33,inst:"snare"},{t:1.67,inst:"snare"},
           {t:3.0,inst:"snare"},{t:3.33,inst:"snare"},{t:3.67,inst:"snare"}
         ]
+      },
+      // 3連符の真ん中を叩くElvinスタイル (休-音-休)
+      {
+        notes: [
+          {k:["b/4"],d:"qr"},
+          {k:["b/4"],d:"8r"},{k:["c/5"],d:"8"},{k:["b/4"],d:"8r"},
+          {k:["b/4"],d:"qr"},
+          {k:["b/4"],d:"8r"},{k:["c/5"],d:"8"},{k:["b/4"],d:"8r"}
+        ],
+        tuplets: [[1, 4], [5, 8]],
+        events: [{t:1.33,inst:"snare"},{t:3.33,inst:"snare"}]
       },
 
       // --- Comp Example 3: バスドラム & Two-Voice (pp. 24-27) ---
@@ -723,5 +734,7 @@
     generateNewEtude();
     drawScore();
   </script>
+  <script data-name="BMC-Widget" data-cfasync="false" src="https://cdnjs.buymeacoffee.com/1.0.0/widget.prod.min.js" data-id="hayashi_jp" data-description="Support me on Buy me a coffee!" data-message="開発へのサポートはこちらから！コーヒー1杯の応援が毎日の励みになります☕️✨" data-color="#40DCA5" data-position="Right" data-x_margin="18" data-y_margin="18"></script>
+</body>
 </body>
 </html>
